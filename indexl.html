@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Quest 3 - Damage Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .stat-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .custom-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%236B7280%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 0.65rem auto;
+        }
+        details > summary {
+            cursor: pointer;
+        }
+        /* Element color classes */
+        .element-fire { color: #f87171; }
+        .element-ice { color: #60a5fa; }
+        .element-poison { color: #34d399; }
+        .element-light { color: #fde68a; }
+        .element-dark { color: #a78bfa; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white p-4 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-yellow-400">Puzzle Quest 3</h1>
+            <h2 class="text-2xl font-semibold text-gray-300">Stat & Damage Calculator</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Configuration -->
+            <div class="lg:col-span-2 space-y-6">
+                
+                <!-- Base & Enemy Stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-800 p-4 rounded-lg">
+                        <div id="baseStats">
+                            <h4 class="text-lg font-semibold mb-3 text-yellow-400">Base Character Stats - Do Not Change</h4>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div><label for="base-power" class="block text-sm font-medium text-gray-400">Power</label><input type="number" id="base-power" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                                <div><label for="base-vitality" class="block text-sm font-medium text-gray-400">Vitality</label><input type="number" id="base-vitality" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                                <div><label for="base-armor" class="block text-sm font-medium text-gray-400">Armor</label><input type="number" id="base-armor" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                                <div><label for="base-resistance" class="block text-sm font-medium text-gray-400">Resistance</label><input type="number" id="base-resistance" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                                <div><label for="base-weapon-damage" class="block text-sm font-medium text-gray-400">Weapon Damage</label><input type="number" id="base-weapon-damage" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                                <div><label for="base-crit-chance" class="block text-sm font-medium text-gray-400">Crit Chance %</label><input type="number" id="base-crit-chance" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                                <div class="col-span-2"><label for="base-crit-damage" class="block text-sm font-medium text-gray-400">Crit Damage %</label><input type="number" id="base-crit-damage" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="100"></div>
+                            </div>
+                        </div>
+                        
+    <script>
+        // Hide the base stats area
+        document.addEventListener('DOMContentLoaded', function() {
+            var baseStatsDiv = document.getElementById('baseStats');
+            if (baseStatsDiv) baseStatsDiv.style.display = 'block';
+        });
+    </script>
+                             <h5 class="text-md font-semibold text-yellow-300 mb-2">Manual Overrides</h5>
+                             <div class="grid grid-cols-2 gap-4">
+                                <div><label for="override-power" class="text-xs text-gray-400">Power</label><input type="number" id="override-power" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-weapon-damage" class="text-xs text-gray-400">Weapon Damage</label><input type="number" id="override-weapon-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-fire-mastery" class="text-xs element-fire font-bold">Fire Mastery</label><input type="number" id="override-fire-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-ice-mastery" class="text-xs element-ice font-bold">Ice Mastery</label><input type="number" id="override-ice-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-poison-mastery" class="text-xs element-poison font-bold">Poison Mastery</label><input type="number" id="override-poison-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-light-mastery" class="text-xs element-light font-bold">Light Mastery</label><input type="number" id="override-light-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-dark-mastery" class="text-xs element-dark font-bold">Dark Mastery</label><input type="number" id="override-dark-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-crit-chance" class="text-xs text-gray-400">Crit Chance %</label><input type="number" id="override-crit-chance" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-crit-damage" class="text-xs text-gray-400">Crit Damage %</label><input type="number" id="override-crit-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-elite-damage" class="text-xs text-gray-400">Elite Damage %</label><input type="number" id="override-elite-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-extra-damage" class="text-xs text-gray-400">Extra Damage %</label><input type="number" id="override-extra-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-fire-strike" class="text-xs element-fire font-bold">Fire Strike %</label><input type="number" id="override-fire-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-ice-strike" class="text-xs element-ice font-bold">Ice Strike %</label><input type="number" id="override-ice-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-poison-strike" class="text-xs element-poison font-bold">Poison Strike %</label><input type="number" id="override-poison-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-light-strike" class="text-xs element-light font-bold">Light Strike %</label><input type="number" id="override-light-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-dark-strike" class="text-xs element-dark font-bold">Dark Strike %</label><input type="number" id="override-dark-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                             
+                        </div>
+                    </div>
+                     <div class="bg-gray-800 p-4 rounded-lg">
+                        <h4 class="text-lg font-semibold mb-3 text-yellow-400">Calculation Inputs</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                             <div><label for="skulls-matched" class="block text-sm font-medium text-gray-400">Skulls Matched</label><input type="number" id="skulls-matched" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="3"></div>
+                            <div><label for="spellbook-level" class="block text-sm font-medium text-gray-400">Spellbook Level</label><input type="number" id="spellbook-level" min="1" max="50" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="50"></div>
+                            <div class="col-span-2"><label for="select-spell" class="block text-sm font-medium text-gray-400">Select Spell</label><select id="select-spell" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"></select></div>
+                            <div><label for="spell-modifier" class="block text-sm font-medium text-gray-400">Spell Modifier</label><input type="number" step="0.1" id="spell-modifier" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="2.0"></div>
+                             <div><label for="spellbook-modifier" class="block text-sm font-medium text-gray-400">Spellbook Modifier</label><input type="number" step="0.1" id="spellbook-modifier" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="2.0"></div>
+                            <div><label for="spell-element" class="block text-sm font-medium text-gray-400">Spell Element</label><select id="spell-element" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"><option>Fire</option><option>Ice</option><option selected>Poison</option><option>Light</option><option>Dark</option></select></div>
+                            <div><label for="gems-on-board" class="block text-sm font-medium text-gray-400">Gems on Board</label><input type="number" id="gems-on-board" min="0" max="48" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="16"></div>
+                             <div><label for="spell-crit-chance" class="block text-sm font-medium text-gray-400">Spell Crit Chance %</label><input type="number" id="spell-crit-chance" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                            <div><label for="spell-crit-damage" class="block text-sm font-medium text-gray-400">Spell Crit Damage %</label><input type="number" id="spell-crit-damage" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="207.2"></div>
+                            <div class="col-span-2"><label for="equipped-spells-count" class="block text-sm font-medium text-gray-400">Equipped Spells of Chosen Color</label><select id="equipped-spells-count" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select></div>
+                            <div class="col-span-2 flex items-center mt-2">
+                                <input id="is-elite-enemy" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
+                                <label for="is-elite-enemy" class="ml-2 block text-sm font-medium text-gray-300">Is Enemy an Elite?</label>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <h5 class="text-md font-semibold text-yellow-300 mb-2">Spellbook Bonuses</h5>
+                            <div class="grid grid-cols-3 lg:grid-cols-5 gap-2">
+                                <div><label for="sb-ice" class="text-xs element-ice font-bold">Ice</label><input type="number" id="sb-ice" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" value="377"></div>
+                                <div><label for="sb-poison" class="text-xs element-poison font-bold">Poison</label><input type="number" id="sb-poison" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" value="405"></div>
+                                <div><label for="sb-fire" class="text-xs element-fire font-bold">Fire</label><input type="number" id="sb-fire" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" value="400"></div>
+                                <div><label for="sb-light" class="text-xs element-light font-bold">Light</label><input type="number" id="sb-light" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" value="372"></div>
+                                <div><label for="sb-dark" class="text-xs element-dark font-bold">Dark</label><input type="number" id="sb-dark" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" value="418"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <h4 class="text-lg font-semibold mb-3 text-yellow-400">Enemy Defensive Stats</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-2"><label for="enemy-color" class="block text-sm font-medium text-gray-400">Enemy Color</label><select id="enemy-color" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"><option>Fire</option><option>Ice</option><option>Poison</option><option>Light</option><option>Dark</option></select></div>
+                        <div class="col-span-2"><label for="select-enemy" class="block text-sm font-medium text-gray-400">Select Enemy</label><select id="select-enemy" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"></select></div>
+                        <div><label for="enemy-level" class="block text-sm font-medium text-gray-400">Enemy Level</label><select id="enemy-level" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"><option>100</option><option selected>200</option></select></div>
+                        <div><label for="enemy-type" class="block text-sm font-medium text-gray-400">Enemy Type</label><select id="enemy-type" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"><option>Normal</option><option>Elite</option></select></div>
+                        <div><label for="enemy-damage-type" class="block text-sm font-medium text-gray-400">Damage Type</label><select id="enemy-damage-type" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2 custom-select"><option>Melee</option><option>Missile</option></select></div>
+                        <div><label for="enemy-damage" class="block text-sm font-medium text-gray-400">Enemy Damage</label><input type="number" id="enemy-damage" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                        <div><label for="enemy-health" class="block text-sm font-medium text-gray-400">Enemy Health</label><input type="number" id="enemy-health" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                        <div><label for="enemy-armor" class="block text-sm font-medium text-gray-400">Enemy Armor</label><input type="number" id="enemy-armor" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                        <div><label for="enemy-resistance" class="block text-sm font-medium text-gray-400">Enemy Resistance</label><input type="number" id="enemy-resistance" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                        <div><label for="enemy-block-chance" class="block text-sm font-medium text-gray-400">Enemy Block Chance %</label><input type="number" id="enemy-block-chance" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                        <div><label for="enemy-block-reduction" class="block text-sm font-medium text-gray-400">Enemy Block Reduction %</label><input type="number" id="enemy-block-reduction" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md p-2" value="0"></div>
+                    </div>
+                </div>
+
+                    <!-- Hero Class and Level Selector -->
+                    <div class="mb-6 flex flex-col md:flex-row md:items-end gap-4">
+                        <div class="flex-1">
+                            <label for="hero-class-select" class="block text-lg font-semibold text-yellow-400 mb-2">Hero Class</label>
+                            <select id="hero-class-select" class="w-full bg-gray-700 text-white p-2 rounded-md">
+                                <option value="None">None</option>
+                                <option value="Berserker">Berserker</option>
+                                <option value="Paladin">Paladin</option>
+                                <option value="Necromancer">Necromancer</option>
+                                <option value="Shaman">Shaman</option>
+                                <option value="Assassin">Assassin</option>
+                                <option value="Mercenary">Mercenary</option>
+                                <option value="Warlock">Warlock</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label for="hero-level-select" class="block text-lg font-semibold text-yellow-400 mb-2">Hero Level</label>
+                            <input type="number" id="hero-level-select" min="1" max="50" value="50" class="w-full bg-gray-700 text-white p-2 rounded-md" />
+                        </div>
+                    </div>
+
+                <h3 class="text-xl font-bold border-b-2 border-yellow-500 pb-2">Gear Configuration</h3>
+                <div id="gear-slots" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Gear slots will be dynamically inserted here -->
+                </div>
+
+                <!-- Citadel Bonuses -->
+                <details class="bg-gray-800 rounded-lg" open>
+                    <summary class="text-xl font-bold p-4 text-yellow-400">Citadel Bonuses</summary>
+                    <div class="p-4 border-t border-gray-700 space-y-4">
+                        <div>
+                            <h5 class="text-lg font-semibold text-yellow-300 mb-2">Citadel Ranks</h5>
+                            <div id="citadel-ranks" class="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-700 p-3 rounded-lg">
+                                <div><label for="citadel-rank-progress" class="block text-xs font-medium text-gray-400">Progress (Gold)</label><input type="number" id="citadel-rank-progress" class="mt-1 block w-full bg-gray-600 p-1 text-sm" value="64"></div>
+                                <div><label for="citadel-rank-heroes" class="block text-xs font-medium text-gray-400">Heroes (Masteries)</label><input type="number" id="citadel-rank-heroes" class="mt-1 block w-full bg-gray-600 p-1 text-sm" value="74"></div>
+                                <div><label for="citadel-rank-battle" class="block text-xs font-medium text-gray-400">Battle (Power)</label><input type="number" id="citadel-rank-battle" class="mt-1 block w-full bg-gray-600 p-1 text-sm" value="76"></div>
+                                <div><label for="citadel-rank-collection" class="block text-xs font-medium text-gray-400">Collection (Vitality)</label><input type="number" id="citadel-rank-collection" class="mt-1 block w-full bg-gray-600 p-1 text-sm" value="73"></div>
+                            </div>
+                        </div>
+                        <div id="citadel-bonuses" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                        </div>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Right Column: Calculated Stats -->
+            <div class="lg:col-span-1 space-y-6">
+                <h3 class="text-xl font-bold border-b-2 border-yellow-500 pb-2">Calculated Results</h3>
+                <div class="bg-gray-800 p-4 rounded-lg space-y-4">
+                    <div class="space-y-3 pb-4 border-b border-gray-700">
+                        <h4 class="text-lg font-semibold text-yellow-400">Build Management</h4>
+                        <div><label for="build-name" class="block text-sm font-medium text-gray-400">Build Name</label><input type="text" id="build-name" class="mt-1 block w-full bg-gray-700 p-2 rounded-md" placeholder="YourBuildName"></div>
+                        <button id="save-build-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Build</button>
+                        <div class="flex gap-2">
+                             <select id="load-build-select" class="block w-full bg-gray-700 p-2 rounded-md custom-select"><option value="">Load a Build...</option></select>
+                            <button id="delete-build-button" class="bg-red-600 hover:bg-red-700 text-white font-bold p-2 rounded-lg" aria-label="Delete"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" /></svg></button>
+                        </div>
+                    </div>
+                    <button id="calculate-button" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-4 rounded-lg">Calculate</button>
+                    <div id="results" class="space-y-3 pt-4"><p class="text-gray-400 text-center">Enter your gear and click Calculate.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const gearSlotsContainer = document.getElementById('gear-slots');
+            const citadelContainer = document.getElementById('citadel-bonuses');
+            const calculateButton = document.getElementById('calculate-button');
+            const resultsContainer = document.getElementById('results');
+            const saveBuildButton = document.getElementById('save-build-button');
+            const loadBuildSelect = document.getElementById('load-build-select');
+            const deleteBuildButton = document.getElementById('delete-build-button');
+            const buildNameInput = document.getElementById('build-name');
+            const selectSpell = document.getElementById('select-spell');
+            const selectEnemy = document.getElementById('select-enemy');
+            const enemyTypeSelect = document.getElementById('enemy-type');
+            const enemyLevelSelect = document.getElementById('enemy-level');
+            const isEliteCheckbox = document.getElementById('is-elite-enemy');
+
+            // Initialization error handling (after DOM refs exist)
+            try {
+                if (!gearSlotsContainer) console.error('Missing #gear-slots container');
+                if (!resultsContainer) console.error('Missing #results container');
+            } catch (e) {
+                console.error('Initialization error:', e);
+            }
+
+            const attributes = [
+                { name: 'Weapon damage', type: 'flat' }, { name: 'Armor', type: 'flat' }, { name: 'Resistance', type: 'flat' }, { name: 'Block', type: 'flat' },
+                { name: 'Strong', type: 'flat' }, { name: 'Life', type: 'flat' }, { name: 'Strike', type: 'percent' },
+                { name: 'Ward', type: 'percent' }, { name: 'Pact', type: 'percent' }, { name: 'Guard', type: 'percent' }, { name: 'Solid', type: 'percent' },
+                { name: 'Aim', type: 'percent' }, { name: 'Mighty', type: 'percent' }, { name: 'Brave', type: 'percent' }, { name: 'Smart', type: 'percent' },
+                { name: 'Rich', type: 'percent' }, { name: 'Parry', type: 'percent' }, { name: 'Cover', type: 'percent' }, { name: 'Heal', type: 'percent' },
+                { name: 'Speed', type: 'flat' }, { name: 'Cleave', type: 'percent' },
+            ];
+            
+            const maxValues = {
+                'Weapon damage': 9894, 'Armor': 6092, 'Resistance': 6092, 'Block': 768, 'Strong': 308, 'Life': 308, 'Magic': 246.2, 'Strike': 15.2,
+                'Ward': 15.2, 'Pact': 15.2, 'Guard': 15.2, 'Solid': 15.2, 'Aim': 15.2, 'Mighty': 15.2, 'Brave': 15.2, 'Smart': 15.2, 'Rich': 15.2, 'Parry': 15.2,
+                'Cover': 15.2, 'Heal': 30, 'Speed': 45.6, 'Cleave': 152, 'Mastery': 246.2
+            };
+
+            const elements = ['Fire', 'Ice', 'Poison', 'Light', 'Dark'];
+            const gearSlotsData = [
+                { id: 'helm', name: 'Helm', type: 'armor', attr0: { name: 'Armor', value: 6092 }, attr1: 'Life' }, { id: 'body', name: 'Body', type: 'armor', attr0: { name: 'Armor', value: 6092 }, attr1: 'Life' },
+                { id: 'glove', name: 'Glove', type: 'armor', attr0: { name: 'Armor', value: 6092 }, attr1: 'Life' }, { id: 'boot', name: 'Boot', type: 'armor', attr0: { name: 'Armor', value: 6092 }, attr1: 'Life' },
+                { id: 'pants', name: 'Pants', type: 'armor', attr0: { name: 'Armor', value: 6092 }, attr1: 'Life' }, { id: 'shoulders', name: 'Shoulders', type: 'armor', attr0: { name: 'Armor', value: 6092 }, attr1: 'Life' },
+                { id: 'weapon1', name: 'Weapon 1', type: 'other', attr0: { name: 'Weapon Damage', value: 9894 }, attr1: 'Strong' }, { id: 'shield', name: 'Shield', type: 'other', attr0: { name: 'Block', value: 768 }, attr1: 'Strong' },
+                { id: 'necklace', name: 'Necklace', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' }, { id: 'ring1', name: 'Ring 1', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' },
+                { id: 'ring2', name: 'Ring 2', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' }, { id: 'belt', name: 'Belt', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' }
+            ];
+            const statMap = { 'Strong': 'Power', 'Life': 'Vitality', 'Aim': 'Crit Chance %', 'Cleave': 'Crit Damage %', 'Weapon damage': 'Weapon Damage' };
+            
+            const citadelData = [
+                { category: 'Offense', stats: [ { name: 'Power', bonus: 0.02, max: 72, target: 'Power', 'default': 62 }, { name: 'Starting Mana', bonus: 0.01, max: 50, target: 'Pact' }, { name: 'Damage Bonus', bonus: 0.002, max: 50, target: 'Global Damage' } ] },
+                { category: 'Defense', stats: [ { name: 'Vitality', bonus: 0.02, max: 72, target: 'Vitality' }, { name: 'Armor', bonus: 0.05, max: 50, target: 'Armor', 'default': 42 }, { name: 'Resistance', bonus: 0.05, max: 50, target: 'Resistance', 'default': 12 } ] },
+                { category: 'Ice Magic', stats: [ { name: 'Ice Mastery', bonus: 0.02, max: 72, target: 'Ice Mastery' }, { name: 'Block', bonus: 0.01, max: 50, target: 'Block', 'default': 12 }, { name: 'Health Bonus', bonus: 0.002, max: 50, target: 'Vitality', 'default': 50 } ] },
+                { category: 'Poison Magic', stats: [ { name: 'Poison Mastery', bonus: 0.02, max: 72, target: 'Poison Mastery', 'default': 61 }, { name: 'Critical Hit Chance', bonus: 0.001, max: 50, target: 'Crit Chance %' }, { name: 'Critical Hit Damage', bonus: 0.01, max: 50, target: 'Crit Damage %' } ] },
+                { category: 'Fire Magic', stats: [ { name: 'Fire Mastery', bonus: 0.02, max: 72, target: 'Fire Mastery' }, { name: 'Elite Damage Bonus', bonus: 0.002, max: 50, target: 'Mighty', 'default': 50 }, { name: 'Elite Damage Protection', bonus: 0.002, max: 50, target: 'Brave', 'default': 11 } ] },
+                { category: 'Light Magic', stats: [ { name: 'Light Mastery', bonus: 0.02, max: 72, target: 'Light Mastery', 'default': 11 }, { name: 'Healing Bonus', bonus: 0.002, max: 50, target: 'Heal', 'default': 50 }, { name: 'Coin Bonus', bonus: 0.002, max: 50, target: 'Rich' } ] },
+                { category: 'Dark Magic', stats: [ { name: 'Dark Mastery', bonus: 0.02, max: 72, target: 'Dark Mastery', 'default': 61 }, { name: 'Melee Resistance', bonus: 0.002, max: 50, target: 'Parry' }, { name: 'Missile Resistance', bonus: 0.002, max: 50, target: 'Cover' } ] }
+            ];
+            
+            const spellData = [
+                { name: 'Abyssal Channel', color: 'Fire', modifier: 0.05625, spellbookModifier: 0.5625 },
+                { name: 'Acid Arrow', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Acid Cloud', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Ambuscade', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Ancestral Ferocity', color: 'Ice', modifier: 3.0, spellbookModifier: 2.0 },
+                { name: 'Assassinate', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Autumn Blast', color: 'Dark', modifier: 0.1, spellbookModifier: 1.0 },
+                { name: 'Beam of Light', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Blackjack', color: 'Dark', modifier: 1.0, spellbookModifier: 2.0 },
+                { name: 'Blast of Corruption', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Bless the Dead', color: 'Light', modifier: 1.4, spellbookModifier: 1.4 },
+                { name: 'Blightfire Fumes', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Blinding Blast', color: 'Light', modifier: 1, spellbookModifier: 1 },
+                { name: 'Bloodlust', color: 'Dark', modifier: 1.0, spellbookModifier: 1.0 },
+                { name: 'Bog Stench', color: 'Light', modifier: 2.5, spellbookModifier: 2.5 },
+                { name: 'Bounty Hunt', color: 'Fire', modifier: 3.0, spellbookModifier: 3.0 },
+                { name: 'Burn the Dead', color: 'Fire', modifier: 2.5, spellbookModifier: 2.5 },
+                { name: 'Burning Anguish', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Burning Darkness', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Burning Fury', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Burning Hands', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Call of the Deep Ones', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Cannon Blast', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Chill Touch', color: 'Ice', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Cleave', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Cloudkill', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Cockatrice Juju', color: 'Ice', modifier: 1.2, spellbookModifier: 2.0 },
+                { name: 'Cold Snap', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Concentrated Venom', color: 'Poison', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Confident Slice', color: 'Fire', modifier: 1.0, spellbookModifier: 1.0 },
+                { name: 'Creeping Terror', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Daemonic Grasp', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Dark Firebolt', color: 'Dark', modifier: 2, spellbookModifier: 2 },
+                { name: 'Deadly Accuracy', color: 'Poison', modifier: 0.06, spellbookModifier: 0.6 },
+                { name: 'Deep Magic', color: 'Dark', modifier: 0.025, spellbookModifier: 0.25 },
+                { name: 'Deep Shot', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Deep Storms', color: 'Light', modifier: 6.0, spellbookModifier: 6.0 },
+                { name: 'Deep Venom', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Deep Waves', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Den of Nightmares', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Desert Night', color: 'Ice', modifier: 1, spellbookModifier: 1 },
+                { name: 'Dirty Blade', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Divine Steed', color: 'Light', modifier: 0.05, spellbookModifier: 0.5 },
+                { name: 'Eldritch Blast', color: 'Dark', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Fireball', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Flaming Skulls', color: 'Fire', modifier: 5.0, spellbookModifier: 2.0 },
+                { name: 'Flashfire Strike', color: 'Light', modifier: 1.8, spellbookModifier: 1.8 },
+                { name: 'From the Shadows', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Frost Bolt', color: 'Ice', modifier: 3.0, spellbookModifier: 1.0 },
+                { name: 'Frostburn', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Funeral Pyre', color: 'Fire', modifier: 3.0, spellbookModifier: 2.0 },
+                { name: 'Gold Sense', color: 'Light', modifier: 0.05, spellbookModifier: 0.5 },
+                { name: 'Greedy Rage', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Grim Scythe', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Hand of Evil', color: 'Ice', modifier: 3.0, spellbookModifier: 2.0 },
+                { name: 'Harpoon Shot', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Hellfire Gate', color: 'Fire', modifier: 0.1, spellbookModifier: 1 },
+                { name: 'Holy Avenger', color: 'Light', modifier: 5.0, spellbookModifier: 2.0 },
+                { name: 'Ice Storm', color: 'Ice', modifier: 1.0, spellbookModifier: 1.0 },
+                { name: 'Icy Terror', color: 'Ice', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Imp Raid', color: 'Fire', modifier: 2.5, spellbookModifier: 2.5 },
+                { name: 'Insect Plague', color: 'Poison', modifier: 3.0, spellbookModifier: 1.0 },
+                { name: 'Light in the Dark', color: 'Light', modifier: 3.0, spellbookModifier: 3.0 },
+                { name: 'Lightning Bolt', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Mask of Terror', color: 'Ice', modifier: 0.0375, spellbookModifier: 0.5625 },
+                { name: 'Mineral Strike', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Mining Drill', color: 'Dark', modifier: 0.6, spellbookModifier: 0.6 },
+                { name: 'Night Blade', color: 'Dark', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Paralyzing Fear', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Pay in Advance', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Poison Charm', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Poison Spirit', color: 'Poison', modifier: 3.0, spellbookModifier: 2.0 },
+                { name: 'Poison Spray', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Poisonous Toads', color: 'Poison', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Purge', color: 'Fire', modifier: 1.0, spellbookModifier: 1.0 },
+                { name: 'Rage of the Ram', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Ray of Frost', color: 'Ice', modifier: 4.0, spellbookModifier: 2.0 },
+                { name: 'Sacred Flame', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Salamander Juju', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Savage Juju', color: 'Poison', modifier: 5.0, spellbookModifier: 2.0 },
+                { name: 'Searing Strike', color: 'Fire', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Shakedown', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Shield of Retribution', color: 'Fire', modifier: 2.5, spellbookModifier: 2.5 },
+                { name: 'Smite', color: 'Light', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Soul of the Scales', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Soul Siphon', color: 'Dark', modifier: 1.0, spellbookModifier: 2.0 },
+                { name: 'Spark of Corruption', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Spin Attack', color: 'Ice', modifier: 1.0, spellbookModifier: 2.0 },
+                { name: 'Split Skulls', color: 'Fire', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Suffocating Presence', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Sunburst', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Sword of Light', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Tangled Skulls', color: 'Poison', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Tentacle Slap', color: 'Dark', modifier: 1.6, spellbookModifier: 1.6 },
+                { name: 'Turn Undead', color: 'Light', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Unnerving Strike', color: 'Dark', modifier: 3.0, spellbookModifier: 2.0 },
+                { name: 'Vampiric Touch', color: 'Dark', modifier: 1.5, spellbookModifier: 1.5 },
+                { name: 'Vital Strike', color: 'Fire', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Winter Mists', color: 'Ice', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Witchbolt', color: 'Dark', modifier: 2.0, spellbookModifier: 2.0 },
+                { name: 'Wrathful Smite', color: 'Dark', modifier: 5.0, spellbookModifier: 2.0 },
+            ];
+            
+            const enemyData = [];
+
+            function generateCitadelInputs() {
+                let html = '';
+                citadelData.forEach(cat => {
+                    html += `<div class="bg-gray-700 p-3 rounded-lg"><h5 class="text-md font-semibold text-yellow-300 mb-2">${cat.category}</h5><div class="space-y-2">`;
+                    cat.stats.forEach((stat) => {
+                        const id = `citadel-${cat.category.toLowerCase().replace(' ', '-')}-${stat.name.toLowerCase().replace(/ /g, '-')}`;
+                        const defaultValue = stat.default || 0;
+                        html += `<div><label for="${id}" class="block text-xs font-medium text-gray-400">${stat.name}</label><input type="number" id="${id}" min="0" max="${stat.max}" data-target="${stat.target}" data-bonus="${stat.bonus}" class="mt-1 block w-full bg-gray-600 p-1 text-sm rounded-md" value="${defaultValue}"></div>`;
+                    });
+                    html += `</div></div>`;
+                });
+                citadelContainer.innerHTML = html;
+            }
+            
+            const fullAttributeList = [];
+            attributes.forEach(attr => {
+                if (['Strike', 'Ward', 'Pact'].includes(attr.name)) {
+                    elements.forEach(el => fullAttributeList.push({ ...attr, name: `${el} ${attr.name}` }));
+                } else {
+                    fullAttributeList.push(attr);
+                }
+            });
+            elements.forEach(el => fullAttributeList.push({ name: `${el} Mastery`, type: 'flat' }));
+
+            function createAttributeSelect(id, slotNumber) {
+                const select = document.createElement('select');
+                select.id = id;
+                select.className = 'mt-1 block w-full bg-gray-700 p-2 custom-select rounded-md';
+                select.innerHTML = `<option value="">Select Attribute ${slotNumber}</option>`;
+                const sourceList = slotNumber === 5 ? fullAttributeList.filter(a => a.name.includes('Mastery')) : fullAttributeList.filter(a => !a.name.includes('Mastery'));
+                sourceList.forEach(attr => select.innerHTML += `<option value="${attr.name}">${attr.name}</option>`);
+                return select;
+            }
+
+            function createGearSlotCard(slot) {
+                const card = document.createElement('div');
+                card.id = `slot-${slot.id}`;
+                card.className = 'bg-gray-800 p-4 rounded-lg';
+                let content = `<h4 class="text-lg font-semibold mb-3 text-yellow-400">${slot.name}</h4><div class="space-y-3">`;
+                
+                if (slot.attr0) {
+                    content += `<div class="grid grid-cols-3 gap-2 items-center"><label for="${slot.id}-attr0-value" class="col-span-1 text-sm font-medium text-gray-400">${slot.attr0.name}:</label><div class="col-span-2"><input type="number" step="any" id="${slot.id}-attr0-value" class="w-full bg-gray-600 p-2 text-sm rounded-md" data-attr-name="${slot.attr0.name}" value="${slot.attr0.value}"></div></div>`;
+                }
+
+                const addAttributeRow = (num, isFixed = false) => {
+                    return `<div class="grid grid-cols-3 gap-2 items-center"><label class="col-span-1 text-sm font-medium text-gray-400">Attr ${num}:</label>${isFixed ? `<span class="col-span-2 bg-gray-600 p-2 rounded-md text-sm">${slot.attr1}</span>` : `<div class="col-span-2" id="${slot.id}-attr${num}-container"></div>`}<input type="number" step="any" id="${slot.id}-attr${num}-value" placeholder="Value" class="col-start-2 col-span-2 mt-1 w-full bg-gray-600 p-2 text-sm rounded-md" data-attr-name="${isFixed ? slot.attr1 : ''}"></div>`;
+                };
+
+                content += addAttributeRow(1, true);
+                for (let i = 2; i <= 5; i++) content += addAttributeRow(i);
+                
+                content += `</div>`;
+                card.innerHTML = content;
+                
+                const attr1Input = card.querySelector(`#${slot.id}-attr1-value`);
+                attr1Input.value = maxValues[slot.attr1] || 0;
+
+                const defaults = {
+                    2: slot.type === 'armor' ? 'Strong' : 'Aim',
+                    3: 'Cleave',
+                    4: 'Mighty',
+                    5: 'Poison Mastery'
+                };
+
+                for (let i = 2; i <= 5; i++) {
+                    const select = createAttributeSelect(`${slot.id}-attr${i}`, i);
+                    card.querySelector(`#${slot.id}-attr${i}-container`).appendChild(select);
+                    const inputEl = card.querySelector(`#${slot.id}-attr${i}-value`);
+                    
+                    const defaultAttrName = defaults[i];
+                    if (defaultAttrName) {
+                        select.value = defaultAttrName;
+                        let baseAttrName = defaultAttrName.includes(' ') ? defaultAttrName.split(' ')[1] : defaultAttrName;
+                        inputEl.value = maxValues[baseAttrName] || 0;
+                        inputEl.dataset.attrName = defaultAttrName;
+                    }
+
+                    select.addEventListener('change', () => {
+                        const selectedAttrName = select.value;
+                        inputEl.dataset.attrName = selectedAttrName;
+                        if (!selectedAttrName) { inputEl.value = ''; return; }
+                        let baseAttrName = selectedAttrName;
+                        const elementalMatch = elements.find(el => selectedAttrName.startsWith(el + ' '));
+                        if (elementalMatch) { baseAttrName = selectedAttrName.replace(elementalMatch + ' ', ''); }
+                        inputEl.value = maxValues[baseAttrName] || 0;
+                    });
+                }
+                return card;
+            }
+
+            function populateSpellDropdown() {
+                selectSpell.innerHTML = '<option value="">None (Manual)</option>';
+                spellData.forEach(spell => {
+                    selectSpell.innerHTML += `<option value="${spell.name}">${spell.name}</option>`;
+                });
+            }
+
+            function populateEnemyDropdown() {
+                selectEnemy.innerHTML = '<option value="">None (Manual)</option>';
+                enemyData.sort((a, b) => a.name.localeCompare(b.name)).forEach(enemy => {
+                    selectEnemy.innerHTML += `<option value="${enemy.name}">${enemy.name}</option>`;
+                });
+            }
+
+            selectSpell.addEventListener('change', () => {
+                const spellName = selectSpell.value;
+                const spell = spellData.find(s => s.name === spellName);
+                if (spell) {
+                    document.getElementById('spell-modifier').value = spell.modifier;
+                    document.getElementById('spellbook-modifier').value = spell.spellbookModifier;
+                    document.getElementById('spell-element').value = spell.color;
+                }
+            });
+            
+            function updateEnemyStats() {
+                const enemyName = selectEnemy.value;
+                const enemy = enemyData.find(e => e.name === enemyName);
+                const level = parseInt(enemyLevelSelect.value);
+
+                if (enemy) {
+                    const stats = enemy.stats[level];
+                    
+                    document.getElementById('enemy-armor').value = stats.armor;
+                    document.getElementById('enemy-resistance').value = stats.resistance;
+                    document.getElementById('enemy-block-chance').value = enemy.blockChance;
+                    document.getElementById('enemy-block-reduction').value = enemy.blockReduction;
+                    document.getElementById('enemy-color').value = enemy.color;
+                    document.getElementById('enemy-type').value = enemy.type || 'Normal';
+                    document.getElementById('enemy-damage-type').value = enemy.damageType;
+                    document.getElementById('enemy-damage').value = stats.damage;
+                    document.getElementById('enemy-health').value = stats.health;
+                    enemyTypeSelect.dispatchEvent(new Event('change'));
+                }
+            }
+            
+            selectEnemy.addEventListener('change', updateEnemyStats);
+            enemyLevelSelect.addEventListener('change', updateEnemyStats);
+            
+            enemyTypeSelect.addEventListener('change', () => {
+                isEliteCheckbox.checked = enemyTypeSelect.value === 'Elite';
+            });
+
+            // Render gear slots once; show placeholder if none
+            if (gearSlotsContainer && Array.isArray(gearSlotsData) && gearSlotsData.length > 0) {
+                gearSlotsData.forEach(slot => gearSlotsContainer.appendChild(createGearSlotCard(slot)));
+            } else if (gearSlotsContainer) {
+                gearSlotsContainer.innerHTML = '<div class="text-red-400">No gear slots available.</div>';
+            }
+            generateCitadelInputs();
+            populateSpellDropdown();
+            populateEnemyDropdown();
+
+            calculateButton.addEventListener('click', () => {
+                try {
+                let totalStats = {
+                    'Power': parseFloat(document.getElementById('base-power').value) || 0,
+                    'Vitality': parseFloat(document.getElementById('base-vitality').value) || 0,
+                    'Armor': parseFloat(document.getElementById('base-armor').value) || 0,
+                    'Resistance': parseFloat(document.getElementById('base-resistance').value) || 0,
+                    'Crit Chance %': parseFloat(document.getElementById('base-crit-chance').value) || 0,
+                    'Crit Damage %': parseFloat(document.getElementById('base-crit-damage').value) || 0,
+                    'Weapon Damage': parseFloat(document.getElementById('base-weapon-damage').value) || 0,
+                    'Block': 0, 'Global Damage': 0
+                };
+
+                // Initialize mastery base from class + spellbook (no multipliers yet)
+                const heroClass = document.getElementById('hero-class-select').value;
+                const heroLevel = Math.max(1, Math.min(50, parseInt(document.getElementById('hero-level-select').value) || 50));
+                const classMasteryBonuses = {
+                    'Assassin':   { primary: 'Dark Mastery', secondary: 'Poison Mastery' },
+                    'Berserker':  { primary: 'Fire Mastery', secondary: 'Ice Mastery' },
+                    'Mercenary':  { primary: 'Fire Mastery', secondary: 'Poison Mastery' },
+                    'Necromancer':{ primary: 'Ice Mastery', secondary: 'Dark Mastery' },
+                    'Paladin':    { primary: 'Light Mastery', secondary: 'Fire Mastery' },
+                    'Shaman':     { primary: 'Poison Mastery', secondary: 'Light Mastery' },
+                    'Warlock':    { primary: 'Dark Mastery', secondary: 'Fire Mastery' }
+                };
+                // Ensure keys exist for masteries and prepare breakdown
+                const masteryBreakdown = {};
+                elements.forEach(el => {
+                    const key = `${el} Mastery`;
+                    totalStats[key] = totalStats[key] || 0;
+                    // Class + Spellbook base
+                    let classBonus = 0;
+                    if (classMasteryBonuses[heroClass]) {
+                        const lvl = heroLevel + 1;
+                        if (key === classMasteryBonuses[heroClass].primary) classBonus = 3 * lvl;
+                        else if (key === classMasteryBonuses[heroClass].secondary) classBonus = 2 * lvl;
+                        else classBonus = 1 * lvl; // Non-primary/secondary colors get 1*(lvl+1)
+                    }
+                    const spellbookInput = parseFloat(document.getElementById(`sb-${el.toLowerCase()}`).value) || 0;
+                    totalStats[key] = classBonus + spellbookInput;
+                    masteryBreakdown[el] = { classBonus, spellbook: spellbookInput, gear: 0, spellsFlat: 0, citadelMult: 1, heroesMult: 1, setMult: 1, override: null, final: 0 };
+                });
+                
+                // Ensure statMap includes all mastery stats
+                statMap["Fire Mastery"] = "Fire Mastery";
+                statMap["Ice Mastery"] = "Ice Mastery";
+                statMap["Poison Mastery"] = "Poison Mastery";
+                statMap["Light Mastery"] = "Light Mastery";
+                statMap["Dark Mastery"] = "Dark Mastery";
+
+                // Process all gear slots and attributes for mastery values
+                gearSlotsData.forEach(slot => {
+                    for (let i = 0; i <= 5; i++) {
+                        const valueInput = document.getElementById(`${slot.id}-attr${i}-value`);
+                        const value = parseFloat(valueInput.value) || 0;
+                        if (value === 0) continue;
+                        const attrName = valueInput.dataset.attrName;
+                        if (!attrName) continue;
+                        const mappedStat = statMap[attrName] || attrName;
+                        totalStats[mappedStat] = (totalStats[mappedStat] || 0) + value;
+                        // Track gear contribution for mastery attributes
+                        const match = /^(Fire|Ice|Poison|Light|Dark) Mastery$/.exec(mappedStat);
+                        if (match) {
+                            const el = match[1];
+                            masteryBreakdown[el].gear += value;
+                        }
+                    }
+                });
+
+                // Add flat mastery per equipped same-color spell BEFORE multipliers
+                // Assumption: equipped-spells-count are all of the selected element
+                const spellElemFlat = document.getElementById('spell-element').value;
+                const equippedSpellsFlat = parseInt(document.getElementById('equipped-spells-count').value) || 0;
+                const flatMasteryPerSpell = 140;
+                if (spellElemFlat && equippedSpellsFlat > 0) {
+                    const addFlat = flatMasteryPerSpell * equippedSpellsFlat;
+                    const keyFlat = `${spellElemFlat} Mastery`;
+                    totalStats[keyFlat] = (totalStats[keyFlat] || 0) + addFlat;
+                    if (masteryBreakdown[spellElemFlat]) {
+                        masteryBreakdown[spellElemFlat].spellsFlat = (masteryBreakdown[spellElemFlat].spellsFlat || 0) + addFlat;
+                    }
+                }
+                
+                const citadelBonuses = { 'Power': 1, 'Vitality': 1, 'Armor': 1, 'Resistance': 1, 'Block': 1, 'Global Damage': 1 };
+                elements.forEach(el => citadelBonuses[`${el} Mastery`] = 1);
+
+                citadelData.forEach(cat => {
+                    cat.stats.forEach(stat => {
+                        const input = document.getElementById(`citadel-${cat.category.toLowerCase().replace(' ', '-')}-${stat.name.toLowerCase().replace(/ /g, '-')}`);
+                        const points = Math.min(parseInt(input.value) || 0, stat.max);
+                        const bonus = points * stat.bonus;
+                        
+                        if (['Crit Chance %', 'Crit Damage %', 'Mighty', 'Brave', 'Heal', 'Rich', 'Parry', 'Cover', 'Pact'].includes(stat.target)) {
+                            totalStats[stat.target] = (totalStats[stat.target] || 0) + (bonus * 100);
+                        } else {
+                            citadelBonuses[stat.target] = (citadelBonuses[stat.target] || 1) + bonus;
+                        }
+                    });
+                });
+                
+                // 2. Apply citadel multipliers after all mastery sources are summed
+                Object.keys(citadelBonuses).forEach(key => {
+                    if (totalStats[key] !== undefined && key !== 'Global Damage') {
+                        totalStats[key] *= citadelBonuses[key];
+                        const m = /^(Fire|Ice|Poison|Light|Dark) Mastery$/.exec(key);
+                        if (m) masteryBreakdown[m[1]].citadelMult = citadelBonuses[key];
+                    }
+                });
+
+                const progressRank = parseFloat(document.getElementById('citadel-rank-progress').value) || 0;
+                totalStats['Rich'] = (totalStats['Rich'] || 0) + (progressRank / 10);
+
+                const heroesRank = parseFloat(document.getElementById('citadel-rank-heroes').value) || 0;
+                const heroesBonusMultiplier = 1 + (heroesRank / 1000);
+                elements.forEach(el => {
+                    const masteryStat = `${el} Mastery`;
+                    totalStats[masteryStat] *= heroesBonusMultiplier;
+                    masteryBreakdown[el].heroesMult = heroesBonusMultiplier;
+                });
+
+                // Capture pre-set (pre "in fight") mastery totals after multipliers, before set bonus
+                elements.forEach(el => {
+                    const masteryStat = `${el} Mastery`;
+                    masteryBreakdown[el].preSet = totalStats[masteryStat];
+                });
+
+                const battleRank = parseFloat(document.getElementById('citadel-rank-battle').value) || 0;
+                const battleBonusMultiplier = 1 + (battleRank / 1000);
+                totalStats['Power'] *= battleBonusMultiplier;
+
+                const collectionRank = parseFloat(document.getElementById('citadel-rank-collection').value) || 0;
+                const collectionBonusMultiplier = 1 + (collectionRank / 1000);
+                totalStats['Vitality'] *= collectionBonusMultiplier;
+                
+                const spellElem = document.getElementById('spell-element').value;
+                const equippedSpells = parseInt(document.getElementById('equipped-spells-count').value) || 0;
+                let spellSetBonus = 0;
+                if (equippedSpells === 2) spellSetBonus = 0.20;
+                else if (equippedSpells === 3) spellSetBonus = 0.40;
+                else if (equippedSpells === 4) spellSetBonus = 0.70;
+                if (spellElem) {
+                    totalStats[`${spellElem} Mastery`] *= (1 + spellSetBonus);
+                    masteryBreakdown[spellElem].setMult = (1 + spellSetBonus);
+                }
+
+                // Apply manual <element> Strike overrides
+                elements.forEach(el => {
+                    const overrideStrike = parseFloat(document.getElementById(`override-${el.toLowerCase()}-strike`).value) || 0;
+                    if (overrideStrike > 0) {
+                        totalStats[`${el} Strike`] = overrideStrike;
+                    }
+                });
+
+                // Overrides
+                const overridePower = parseFloat(document.getElementById('override-power').value) || 0;
+                if (overridePower > 0) totalStats['Power'] = overridePower;
+                elements.forEach(el => {
+                    const overrideMastery = parseFloat(document.getElementById(`override-${el.toLowerCase()}-mastery`).value) || 0;
+                    if (overrideMastery > 0) {
+                        totalStats[`${el} Mastery`] = overrideMastery;
+                        masteryBreakdown[el].override = overrideMastery;
+                        // Treat override as the pre-set base for display purposes
+                        masteryBreakdown[el].preSet = overrideMastery;
+                    }
+                });
+
+                // Add overrides for Crit Chance %, Crit Damage %, Elite Damage %, Extra Damage %
+                // Weapon Damage override
+                const overrideWeaponDamage = parseFloat(document.getElementById('override-weapon-damage').value) || 0;
+                if (overrideWeaponDamage > 0) totalStats['Weapon Damage'] = overrideWeaponDamage;
+                const overrideCritChance = parseFloat(document.getElementById('override-crit-chance').value) || 0;
+                if (overrideCritChance > 0) totalStats['Crit Chance %'] = overrideCritChance;
+
+                const overrideCritDamage = parseFloat(document.getElementById('override-crit-damage').value) || 0;
+                if (overrideCritDamage > 0) totalStats['Crit Damage %'] = overrideCritDamage;
+
+                const overrideEliteDamage = parseFloat(document.getElementById('override-elite-damage').value) || 0;
+                if (overrideEliteDamage > 0) totalStats['Mighty'] = overrideEliteDamage;
+
+                const overrideExtraDamage = parseFloat(document.getElementById('override-extra-damage').value) || 0;
+                if (overrideExtraDamage > 0) totalStats['Global Damage'] = overrideExtraDamage;
+
+
+                const skulls = parseInt(document.getElementById('skulls-matched').value) || 0;
+                const spellMod = parseFloat(document.getElementById('spell-modifier').value) || 0;
+                const spellbookMod = parseFloat(document.getElementById('spellbook-modifier').value) || 0;
+                const enemyArmor = parseFloat(document.getElementById('enemy-armor').value) || 0;
+                const enemyResist = parseFloat(document.getElementById('enemy-resistance').value) || 0;
+                const isElite = document.getElementById('is-elite-enemy').checked;
+                const spellCritChance = parseFloat(document.getElementById('spell-crit-chance').value) || 0;
+                const spellCritDamage = parseFloat(document.getElementById('spell-crit-damage').value) || 0;
+                const spellbookLevel = parseInt(document.getElementById('spellbook-level').value) || 0;
+                const gemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                const enemyBlockChance = parseFloat(document.getElementById('enemy-block-chance').value) || 0;
+                const enemyBlockReduction = parseFloat(document.getElementById('enemy-block-reduction').value) || 0;
+                const enemyColor = document.getElementById('enemy-color').value;
+
+                const eliteMultiplier = isElite ? (1 + (totalStats['Mighty'] / 100)) : 1;
+                const globalDamageMultiplier = 1 + citadelBonuses['Global Damage'] - 1;
+
+                const cappedCritChanceForCalc = Math.min(totalStats['Crit Chance %'], 80);
+
+                let skullMultiplier = 0;
+                if (skulls > 0 && skulls <= 9) skullMultiplier = 0.01 * Math.pow(skulls, 2) + 0.13 * skulls + 0.52;
+                else if (skulls > 9) skullMultiplier = 2.5 + 0.25 * (skulls - 9);
+                
+                let baseSkullDmg = (totalStats['Weapon Damage'] + totalStats['Power']) * skullMultiplier;
+                baseSkullDmg *= eliteMultiplier * globalDamageMultiplier;
+                const finalSkullDmg = Math.max(0, baseSkullDmg - enemyArmor);
+                const critSkullDmg = finalSkullDmg * (1 + totalStats['Crit Damage %'] / 100);
+                
+                const avgCritSkullDmg = (finalSkullDmg * (1 - cappedCritChanceForCalc / 100)) + (critSkullDmg * (cappedCritChanceForCalc / 100));
+                const avgSkullDmg = (avgCritSkullDmg * (1 - enemyBlockChance/100)) + (avgCritSkullDmg * (1 - enemyBlockReduction/100) * (enemyBlockChance/100));
+
+
+                const masteryStat = spellElem ? `${spellElem} Mastery` : '';
+                const strikeStat = spellElem ? `${spellElem} Strike` : '';
+                
+                const spellbookBaseDamage = Math.pow(spellbookLevel, 1.9) * spellbookMod;
+
+                const masteryValue = spellElem ? (parseFloat(totalStats[masteryStat]) || 0) : 0;
+                let baseSpellDmg = ((totalStats['Power'] + masteryValue) * spellMod) + spellbookBaseDamage;
+                
+                const selectedSpellName = document.getElementById('select-spell').value;
+                const selectedSpell = spellData.find(s => s.name === selectedSpellName);
+                // Night Blade: add 11% dark damage per dark gem on board
+                // For Soul Siphon, use skull gems on board
+                let skullGemsOnBoard = 0;
+                if (selectedSpell && selectedSpell.name === 'Soul Siphon') {
+                    skullGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                }
+                if (selectedSpell && selectedSpell.name === 'Night Blade') {
+                    const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    baseSpellDmg *= (1 + 0.11 * darkGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.name === 'Dark Firebolt') {
+                    const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    baseSpellDmg *= (1 + 0.09 * darkGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.name === 'Frost Bolt') {
+                    const iceGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    baseSpellDmg *= (1 + 0.16 * iceGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.name === 'Imp Raid') {
+                    const impGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    baseSpellDmg *= (1 + 0.11 * impGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.name === 'Purge') {
+                    // For Purge, use yellow gems on board
+                    const yellowGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    baseSpellDmg *= (1 + 0.10 * yellowGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.name === 'Searing Strike') {
+                    const firePoisonGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    baseSpellDmg *= (1 + 0.08 * firePoisonGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.name === 'Soul Siphon') {
+                    baseSpellDmg *= (1 + 0.10 * skullGemsOnBoard);
+                } else if (selectedSpell && selectedSpell.gemBonus) {
+                    baseSpellDmg *= (1 + (gemsOnBoard * selectedSpell.gemBonus));
+                }
+
+                const strikePct = parseFloat(totalStats[strikeStat]) || 0;
+                let boostedSpellDmg = baseSpellDmg * (1 + (strikePct / 100));
+                boostedSpellDmg *= eliteMultiplier * globalDamageMultiplier;
+
+                const colorAdvantage = {
+                    'Fire': { strong: 'Poison', weak: 'Ice' },
+                    'Poison': { strong: 'Ice', weak: 'Fire' },
+                    'Ice': { strong: 'Fire', weak: 'Poison' },
+                    'Light': { strong: 'Dark', weak: 'Dark' },
+                    'Dark': { strong: 'Light', weak: 'Light' }
+                };
+                if (spellElem && colorAdvantage[spellElem] && colorAdvantage[spellElem].strong === enemyColor) {
+                    boostedSpellDmg *= 1.25;
+                } else if (spellElem && colorAdvantage[spellElem] && colorAdvantage[spellElem].weak === enemyColor) {
+                    boostedSpellDmg *= 0.75;
+                }
+
+                const finalSpellDmg = Math.max(0, boostedSpellDmg - enemyResist);
+
+                const critSpellDmg = finalSpellDmg * (1 + spellCritDamage / 100);
+                const avgSpellDmg = (finalSpellDmg * (1 - spellCritChance / 100)) + (critSpellDmg * (spellCritChance / 100));
+
+                // Compute display-friendly mastery values
+                elements.forEach(el => {
+                    const pre = typeof masteryBreakdown[el].preSet === 'number' ? masteryBreakdown[el].preSet : totalStats[`${el} Mastery`];
+                    const setM = masteryBreakdown[el].setMult || 1;
+                    masteryBreakdown[el].mastery = pre; // excludes set
+                    masteryBreakdown[el].inFight = pre * setM; // includes set
+                    // Keep legacy 'final' for backward compatibility
+                    masteryBreakdown[el].final = masteryBreakdown[el].inFight;
+                });
+                const elemForDisplay = spellElem || 'None';
+                displayResults({ totalStats, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg }, isElite });
+                } catch (err) {
+                    console.error('Calculation error:', err);
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '<div class="text-red-400">An error occurred during calculation. Check console for details.</div>';
+                    }
+                }
+            });
+
+            function displayResults(data) {
+                try {
+                    console.log('DEBUG: displayResults called');
+                    resultsContainer.innerHTML = '';
+                    // Helper to get color class for element
+                    const getElementClass = (elem) => {
+                        if (!elem) return '';
+                        const map = {
+                            'Fire': 'element-fire',
+                            'Ice': 'element-ice',
+                            'Poison': 'element-poison',
+                            'Light': 'element-light',
+                            'Dark': 'element-dark'
+                        };
+                        return map[elem] || '';
+                    };
+                    // Helper to wrap element mentions in colored span
+                    const colorElementText = (text) => {
+                        return text.replace(/(Fire|Ice|Poison|Light|Dark)/g, (m) => `<span class="${getElementClass(m)}">${m}</span>`);
+                    };
+                    const createStatDisplay = (label, value, unit = '', note = '') => {
+                        let displayValue;
+                        if (typeof value === 'number' && !isNaN(value)) {
+                            displayValue = value.toFixed(2);
+                        } else if (value === undefined || value === null) {
+                            displayValue = '0.00';
+                        } else {
+                            displayValue = value;
+                        }
+                        return `<div class="flex justify-between items-center bg-gray-700 p-2 rounded-md stat-card"><span class="font-semibold text-gray-300">${colorElementText(label)}:</span> <span class="font-bold text-yellow-400">${displayValue}${unit} <span class="text-red-400 text-xs ml-1">${note}</span></span></div>`;
+                    };
+                    const createSectionHeader = (title) => `<h4 class="text-lg font-semibold mt-4 pt-2 border-t border-gray-600 text-yellow-400">${colorElementText(title)}</h4>`;
+
+                    // Determine which masteries have manual overrides for indicator
+                    const masteryOverrides = {};
+                    ['Fire','Ice','Poison','Light','Dark'].forEach(el => {
+                        const val = parseFloat(document.getElementById(`override-${el.toLowerCase()}-mastery`).value) || 0;
+                        if (val > 0) masteryOverrides[`${el} Mastery`] = val;
+                    });
+
+                    let html = createSectionHeader('Total Stats');
+                    Object.entries(data.totalStats).forEach(([key, value]) => {
+                        if (value > 0 && key !== 'Block' && key !== 'Global Damage') {
+                            if (key === 'Crit Chance %') {
+                                const cappedValue = Math.min(value, 80);
+                                const overage = Math.max(0, value - 80);
+                                const note = overage > 0 ? `(+${overage.toFixed(2)}% over cap)` : '';
+                                html += createStatDisplay(key, cappedValue, '%', note);
+                            } else {
+                                const attrInfo = fullAttributeList.find(a => a.name === key);
+                                const unit = (attrInfo && attrInfo.type === 'percent') || key.includes('%') ? '%' : '';
+                                const note = masteryOverrides.hasOwnProperty(key) ? 'OVERRIDE' : '';
+                                html += createStatDisplay(key, value, unit, note);
+                            }
+                        }
+                    });
+
+                    // Render per-element Mastery and In-Fight Mastery summaries
+                    if (data.masteryBreakdown) {
+                        html += createSectionHeader('Elemental Mastery Totals');
+                        elements.forEach(el => {
+                            const b = data.masteryBreakdown[el];
+                            if (!b) return;
+                            html += createStatDisplay(`${el} Mastery`, b.mastery || 0);
+                            html += createStatDisplay(`${el} Mastery (In-Fight)`, b.inFight || 0);
+                        });
+                    }
+
+                    // Mastery breakdown (debug/diagnostic)
+                    if (data.masteryBreakdown) {
+                        html += createSectionHeader('Mastery breakdown');
+                        elements.forEach(el => {
+                            const b = data.masteryBreakdown[el];
+                            if (!b) return;
+                            const lines = [
+                                `Class Bonus: ${b.classBonus.toFixed(2)}`,
+                                `Spellbook: ${b.spellbook.toFixed(2)}`,
+                                `Gear: ${b.gear.toFixed(2)}`,
+                                `Spells: +${(b.spellsFlat || 0).toFixed(2)}`,
+                                `Citadel × ${b.citadelMult.toFixed(3)}`,
+                                `Heroes × ${b.heroesMult.toFixed(3)}`,
+                                `Mastery (pre-set): ${((b.preSet !== undefined ? b.preSet : b.mastery) || 0).toFixed(2)}`,
+                                `Set × ${b.setMult.toFixed(3)}`,
+                                `In-Fight: ${(b.inFight || (b.preSet || 0) * (b.setMult || 1)).toFixed(2)}`
+                            ];
+                            if (b.override !== null) lines.push(`Override = ${b.override.toFixed(2)}`);
+                            lines.push(`Final = ${b.final.toFixed(2)}`);
+                            html += `<div class="bg-gray-700 p-2 rounded-md mt-2"><div class="font-semibold ${getElementClass(el)}">${el} Mastery</div><div class="text-xs text-gray-300">${lines.join(' • ')}</div></div>`;
+                        });
+                    }
+                
+                    if (data.totalStats.Block > 0) {
+                        const uncappedBlock = data.totalStats.Block / 10;
+                        const cappedBlock = Math.min(uncappedBlock, 80);
+                        const overage = Math.max(0, uncappedBlock - 80);
+                        const note = overage > 0 ? `(+${overage.toFixed(2)}% over cap)` : '';
+                        html += createSectionHeader('Defensive Stats');
+                        html += createStatDisplay('Total Block', data.totalStats.Block);
+                        html += createStatDisplay('Block Chance', cappedBlock, '%', note);
+                        html += createStatDisplay('Block Damage Reduction', cappedBlock, '%', note);
+                    }
+                
+                    const targetType = data.isElite ? ' (vs. Elite)' : '';
+
+                    html += createSectionHeader(`Skull Damage${targetType}`);
+                    html += createStatDisplay('Total Potential Damage', data.skull.total);
+                    html += createStatDisplay('Unblocked Hit', data.skull.final);
+                    html += createStatDisplay('Blocked Hit', data.skull.final * (1 - (parseFloat(document.getElementById('enemy-block-reduction').value) || 0) / 100));
+                    html += createStatDisplay('Critical Hit', data.skull.crit);
+                    html += createStatDisplay('Blocked Critical Hit', data.skull.crit * (1 - (parseFloat(document.getElementById('enemy-block-reduction').value) || 0) / 100));
+                    html += createStatDisplay('Average Hit', data.skull.avg);
+
+                    html += createSectionHeader(`${data.spell.elem} Spell Damage${targetType}`);
+                    html += createStatDisplay('Total Potential Damage', data.spell.total);
+                    html += createStatDisplay('Normal Hit', data.spell.final);
+                    html += createStatDisplay('Critical Hit', data.spell.crit);
+                    html += createStatDisplay('Average Hit', data.spell.avg);
+
+                    // Show additional damage from gems on board for Night Blade, Dark Firebolt, Frost Bolt, Imp Raid, Purge, Searing Strike, and Soul Siphon
+                    const selectedSpellName = document.getElementById('select-spell').value;
+                    if (selectedSpellName === 'Night Blade') {
+                        const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.11 * darkGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Dark Gems', bonusDmg, '', `(${darkGemsOnBoard} gems)`);
+                    } else if (selectedSpellName === 'Dark Firebolt') {
+                        const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.09 * darkGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Dark Gems', bonusDmg, '', `(${darkGemsOnBoard} gems)`);
+                    } else if (selectedSpellName === 'Frost Bolt') {
+                        const iceGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.16 * iceGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Ice Gems', bonusDmg, '', `(${iceGemsOnBoard} gems)`);
+                    } else if (selectedSpellName === 'Imp Raid') {
+                        const impGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.11 * impGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Imp Gems', bonusDmg, '', `(${impGemsOnBoard} gems)`);
+                    } else if (selectedSpellName === 'Purge') {
+                        const yellowGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.10 * yellowGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Yellow Gems', bonusDmg, '', `(${yellowGemsOnBoard} gems)`);
+                    } else if (selectedSpellName === 'Searing Strike') {
+                        const firePoisonGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.08 * firePoisonGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Fire & Poison Gems', bonusDmg, '', `(${firePoisonGemsOnBoard} gems)`);
+                    } else if (selectedSpellName === 'Soul Siphon') {
+                        const skullGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
+                        const baseSpellDmg = data.spell.total / (1 + 0.10 * skullGemsOnBoard);
+                        const bonusDmg = data.spell.total - baseSpellDmg;
+                        html += createStatDisplay('Bonus from Skull Gems', bonusDmg, '', `(${skullGemsOnBoard} gems)`);
+                    }
+                
+                    console.log('DEBUG: html to inject:', html);
+                    resultsContainer.innerHTML = html;
+                } catch (err) {
+                    console.error('Render error:', err);
+                    if (resultsContainer) {
+                        resultsContainer.innerHTML = '<div class="text-red-400">An error occurred while rendering results. Check console for details.</div>';
+                    }
+                }
+            }
+
+            const BUILDS_STORAGE_KEY = 'pq3_builds';
+            function getBuilds() { return JSON.parse(localStorage.getItem(BUILDS_STORAGE_KEY)) || []; }
+            function saveBuilds(builds) { localStorage.setItem(BUILDS_STORAGE_KEY, JSON.stringify(builds)); }
+
+            function populateBuildsDropdown() {
+                const builds = getBuilds();
+                loadBuildSelect.innerHTML = '<option value="">Load a Build...</option>';
+                builds.forEach(build => {
+                    const option = document.createElement('option');
+                    option.value = build.name;
+                    option.textContent = build.name;
+                    loadBuildSelect.appendChild(option);
+                });
+            }
+
+            saveBuildButton.addEventListener('click', () => {
+                const name = buildNameInput.value.trim();
+                if (!name) { alert('Please enter a name for the build.'); return; }
+
+                const buildData = { name: name, baseStats: {}, calcInputs: {}, gear: {}, citadel: {} };
+                
+                ['base-power', 'base-vitality', 'base-armor', 'base-resistance', 'base-weapon-damage', 'base-crit-chance', 'base-crit-damage', 'override-power', 'override-fire-mastery', 'override-ice-mastery', 'override-poison-mastery', 'override-light-mastery', 'override-dark-mastery'].forEach(id => buildData.baseStats[id] = document.getElementById(id).value);
+                ['enemy-armor', 'enemy-resistance', 'skulls-matched', 'spell-modifier', 'spell-element', 'is-elite-enemy', 'spell-crit-chance', 'spell-crit-damage', 'sb-fire', 'sb-ice', 'sb-poison', 'sb-light', 'sb-dark', 'equipped-spells-count', 'select-spell', 'spellbook-level', 'spellbook-modifier', 'gems-on-board', 'enemy-color', 'enemy-block-chance', 'enemy-block-reduction', 'select-enemy', 'enemy-level', 'enemy-type', 'enemy-damage-type', 'enemy-damage', 'enemy-health'].forEach(id => {
+                    const el = document.getElementById(id);
+                    buildData.calcInputs[id] = el.type === 'checkbox' ? el.checked : el.value;
+                });
+
+                gearSlotsData.forEach(slot => {
+                    buildData.gear[slot.id] = [];
+                    for (let i = 0; i <= 5; i++) {
+                        const selectEl = document.getElementById(`${slot.id}-attr${i}`);
+                        const valueEl = document.getElementById(`${slot.id}-attr${i}-value`);
+                        buildData.gear[slot.id].push({ attr: selectEl ? selectEl.value : valueEl.dataset.attrName, value: valueEl.value });
+                    }
+                });
+                
+                document.querySelectorAll('#citadel-bonuses input, #citadel-ranks input').forEach(input => {
+                    buildData.citadel[input.id] = input.value;
+                });
+
+                const builds = getBuilds();
+                const existingIndex = builds.findIndex(b => b.name === name);
+                if (existingIndex > -1) { builds[existingIndex] = buildData; } else { builds.push(buildData); }
+                saveBuilds(builds);
+                populateBuildsDropdown();
+                loadBuildSelect.value = name;
+                alert(`Build '${name}' saved!`);
+            });
+
+            loadBuildSelect.addEventListener('change', () => {
+                const buildName = loadBuildSelect.value;
+                if (!buildName) return;
+                const build = getBuilds().find(b => b.name === buildName);
+                if (build) {
+                    Object.entries(build.baseStats).forEach(([id, value]) => {
+                        const el = document.getElementById(id);
+                        if (el) el.value = value;
+                    });
+                    Object.entries(build.calcInputs).forEach(([id, value]) => {
+                        const el = document.getElementById(id);
+                        if (el) { if (el.type === 'checkbox') { el.checked = value; } else { el.value = value; } }
+                    });
+                    Object.entries(build.gear).forEach(([slotId, attrs]) => {
+                        attrs.forEach((attrData, index) => {
+                            const i = index;
+                            const selectEl = document.getElementById(`${slotId}-attr${i}`);
+                            const valueEl = document.getElementById(`${slotId}-attr${i}-value`);
+                            if (selectEl) { selectEl.value = attrData.attr; }
+                            valueEl.value = attrData.value;
+                            valueEl.dataset.attrName = attrData.attr;
+                        });
+                    });
+                    if (build.citadel) {
+                        Object.entries(build.citadel).forEach(([id, value]) => {
+                           const el = document.getElementById(id);
+                           if(el) el.value = value;
+                        });
+                    }
+                    buildNameInput.value = build.name;
+                    calculateButton.click();
+                }
+            });
+
+            deleteBuildButton.addEventListener('click', () => {
+                const buildName = loadBuildSelect.value;
+                if (!buildName) { alert('Please select a build to delete.'); return; }
+                let builds = getBuilds().filter(b => b.name !== buildName);
+                saveBuilds(builds);
+                populateBuildsDropdown();
+                buildNameInput.value = '';
+                alert(`Build '${buildName}' deleted.`);
+            });
+
+            populateBuildsDropdown();
+            // Trigger calculation on load to show default results
+            calculateButton.click();
+    });
+    </script>
+</body>
+</html>
