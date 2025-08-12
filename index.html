@@ -927,11 +927,13 @@
                     };
                     const createSectionHeader = (title) => `<h4 class="text-lg font-semibold mt-4 pt-2 border-t border-gray-600 text-yellow-400">${colorElementText(title)}</h4>`;
 
-                    // Determine which masteries have manual overrides for indicator
-                    const masteryOverrides = {};
+                    // Determine which masteries/strikes have manual overrides for indicator
+                    const overridesIndicator = {};
                     ['Fire','Ice','Poison','Light','Dark'].forEach(el => {
-                        const val = parseFloat(document.getElementById(`override-${el.toLowerCase()}-mastery`).value) || 0;
-                        if (val > 0) masteryOverrides[`${el} Mastery`] = val;
+                        const mVal = parseFloat(document.getElementById(`override-${el.toLowerCase()}-mastery`).value) || 0;
+                        if (mVal > 0) overridesIndicator[`${el} Mastery`] = mVal;
+                        const sVal = parseFloat(document.getElementById(`override-${el.toLowerCase()}-strike`).value) || 0;
+                        if (sVal > 0) overridesIndicator[`${el} Strike`] = sVal;
                     });
 
                     let html = createSectionHeader('Total Stats');
@@ -981,7 +983,7 @@
                             } else {
                                 const attrInfo = fullAttributeList.find(a => a.name === key);
                                 const unit = (attrInfo && attrInfo.type === 'percent') || key.includes('%') ? '%' : '';
-                                const note = masteryOverrides.hasOwnProperty(key) ? 'OVERRIDE' : '';
+                                const note = overridesIndicator.hasOwnProperty(key) ? 'OVERRIDE' : '';
                                 html += createStatDisplay(key, value, unit, note);
                             }
                         }
@@ -1108,7 +1110,13 @@
 
                 const buildData = { name: name, baseStats: {}, calcInputs: {}, gear: {}, citadel: {} };
                 
-                ['base-power', 'base-vitality', 'base-armor', 'base-resistance', 'base-weapon-damage', 'base-crit-chance', 'base-crit-damage', 'override-power', 'override-fire-mastery', 'override-ice-mastery', 'override-poison-mastery', 'override-light-mastery', 'override-dark-mastery', 'override-fire-mastery-infight', 'override-ice-mastery-infight', 'override-poison-mastery-infight', 'override-light-mastery-infight', 'override-dark-mastery-infight'].forEach(id => buildData.baseStats[id] = document.getElementById(id).value);
+                ['base-power', 'base-vitality', 'base-armor', 'base-resistance', 'base-weapon-damage', 'base-crit-chance', 'base-crit-damage',
+                 'override-power',
+                 'override-fire-mastery', 'override-ice-mastery', 'override-poison-mastery', 'override-light-mastery', 'override-dark-mastery',
+                 'override-fire-mastery-infight', 'override-ice-mastery-infight', 'override-poison-mastery-infight', 'override-light-mastery-infight', 'override-dark-mastery-infight',
+                 // NEW: Elemental Strike overrides
+                 'override-fire-strike','override-ice-strike','override-poison-strike','override-light-strike','override-dark-strike'
+                ].forEach(id => buildData.baseStats[id] = document.getElementById(id).value);
                 ['enemy-armor', 'enemy-resistance', 'skulls-matched', 'spell-modifier', 'spell-element', 'is-elite-enemy', 'spell-crit-chance', 'spell-crit-damage', 'sb-fire', 'sb-ice', 'sb-poison', 'sb-light', 'sb-dark', 'equipped-spells-count', 'select-spell', 'spellbook-level', 'spellbook-modifier', 'gems-on-board', 'enemy-color', 'enemy-block-chance', 'enemy-block-reduction', 'select-enemy', 'enemy-level', 'enemy-type', 'enemy-damage-type', 'enemy-damage', 'enemy-health', 
                  // NEW:
                  'has-runic-wristbands', 'runic-wristbands-rarity'
