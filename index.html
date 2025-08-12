@@ -158,34 +158,31 @@
                 </div>
 
                     <!-- Hero Class and Level Selector -->
-                    <div class="mb-6 flex flex-col md:flex-row md:items-end gap-4">
-                        <div class="flex-1">
-                            <label for="hero-class-select" class="block text-lg font-semibold text-yellow-400 mb-2">Hero Class</label>
-                            <select id="hero-class-select" class="w-full bg-gray-700 text-white p-2 rounded-md">
-                                <option value="None">None</option>
-                                <option value="Berserker">Berserker</option>
-                                <option value="Paladin">Paladin</option>
-                                <option value="Necromancer">Necromancer</option>
-                                <option value="Shaman">Shaman</option>
-                                <option value="Assassin">Assassin</option>
-                                <option value="Mercenary">Mercenary</option>
-                                <option value="Warlock">Warlock</option>
-                            </select>
-                        </div>
-                        <div class="flex-1">
-                            <label for="hero-level-select" class="block text-lg font-semibold text-yellow-400 mb-2">Hero Level</label>
-                            <input type="number" id="hero-level-select" min="1" max="50" value="50" class="w-full bg-gray-700 text-white p-2 rounded-md" />
+                    <div class="bg-gray-800 p-4 rounded-lg mb-6">
+                        <div class="flex flex-col md:flex-row md:items-end gap-4">
+                            <div class="flex-1">
+                                <label for="hero-class-select" class="block text-lg font-semibold text-yellow-400 mb-2">Hero Class</label>
+                                <select id="hero-class-select" class="w-full bg-gray-700 text-white p-2 rounded-md">
+                                    <option value="None">None</option>
+                                    <option value="Berserker">Berserker</option>
+                                    <option value="Paladin">Paladin</option>
+                                    <option value="Necromancer">Necromancer</option>
+                                    <option value="Shaman">Shaman</option>
+                                    <option value="Assassin">Assassin</option>
+                                    <option value="Mercenary">Mercenary</option>
+                                    <option value="Warlock">Warlock</option>
+                                </select>
+                            </div>
+                            <div class="flex-1">
+                                <label for="hero-level-select" class="block text-lg font-semibold text-yellow-400 mb-2">Hero Level</label>
+                                <input type="number" id="hero-level-select" min="1" max="50" value="50" class="w-full bg-gray-700 text-white p-2 rounded-md" />
+                            </div>
                         </div>
                     </div>
 
-                <h3 class="text-xl font-bold border-b-2 border-yellow-500 pb-2">Gear Configuration</h3>
-                <div id="gear-slots" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Gear slots will be dynamically inserted here -->
-                </div>
-
-                <!-- Special Gear Effects -->
+                <!-- Special Gear Modifiers -->
                 <div class="bg-gray-800 p-4 rounded-lg mt-4">
-                    <h4 class="text-lg font-semibold text-yellow-400">Special Gear Effects</h4>
+                    <h4 class="text-lg font-semibold text-yellow-400">Special Gear Modifiers</h4>
                     <div class="flex flex-wrap items-center gap-3 mt-2">
                         <input id="has-runic-wristbands" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
                         <label for="has-runic-wristbands" class="text-sm text-gray-300">Runic Wristbands equipped</label>
@@ -197,6 +194,47 @@
                         </select>
                         <span class="text-xs text-gray-400">Adds % of highest in‑fight mastery to Crit Damage %</span>
                     </div>
+
+                    <!-- Runic Mace -->
+                    <div class="flex flex-wrap items-center gap-3 mt-4">
+                        <input id="has-runic-mace" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
+                        <label for="has-runic-mace" class="text-sm text-gray-300">Runic Mace equipped</label>
+                        <select id="runic-mace-rarity" class="bg-gray-700 text-white p-2 rounded-md custom-select">
+                            <option value="Rare">Rare (10%)</option>
+                            <option value="Epic">Epic (15%)</option>
+                            <option value="Legendary">Legendary (20%)</option>
+                            <option value="Mythic" selected>Mythic (25%)</option>
+                        </select>
+                        <select id="runic-mace-element" class="bg-gray-700 text-white p-2 rounded-md custom-select">
+                            <option>Fire</option>
+                            <option>Ice</option>
+                            <option>Poison</option>
+                            <option>Light</option>
+                            <option>Dark</option>
+                        </select>
+                        <span class="text-xs text-gray-400">Adds 10|15|20|25% of selected element Mastery to Power</span>
+                    </div>
+
+                    <!-- Dragonking Axe -->
+                    <div class="flex flex-wrap items-center gap-3 mt-4">
+                        <input id="has-dragonking-axe" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
+                        <label for="has-dragonking-axe" class="text-sm text-gray-300">Dragonking Axe equipped</label>
+                        <select id="dragonking-axe-element" class="bg-gray-700 text-white p-2 rounded-md custom-select">
+                            <option>Fire</option>
+                            <option>Ice</option>
+                            <option>Poison</option>
+                            <option>Light</option>
+                            <option>Dark</option>
+                        </select>
+                        <label for="dragonking-axe-gems" class="text-sm text-gray-300 ml-2">Gems on Board</label>
+                        <input id="dragonking-axe-gems" type="number" min="0" max="48" value="0" class="w-24 bg-gray-700 text-white p-2 rounded-md">
+                        <span class="text-xs text-gray-400">Boosts selected element damage by 10% + 2% per element gem (0–48)</span>
+                    </div>
+                </div>
+
+                <h3 class="text-xl font-bold border-b-2 border-yellow-500 pb-2">Gear Configuration</h3>
+                <div id="gear-slots" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Gear slots will be dynamically inserted here -->
                 </div>
 
                 <!-- Citadel Bonuses -->
@@ -220,8 +258,8 @@
 
             <!-- Right Column: Calculated Stats -->
             <div class="lg:col-span-1 space-y-6">
-                <h3 class="text-xl font-bold border-b-2 border-yellow-500 pb-2">Calculated Results</h3>
                 <div class="bg-gray-800 p-4 rounded-lg space-y-4">
+                    <h3 class="text-xl font-bold text-yellow-400">Calculated Results</h3>
                     <div class="space-y-3 pb-4 border-b border-gray-700">
                         <h4 class="text-lg font-semibold text-yellow-400">Build Management</h4>
                         <div><label for="build-name" class="block text-sm font-medium text-gray-400">Build Name</label><input type="text" id="build-name" class="mt-1 block w-full bg-gray-700 p-2 rounded-md" placeholder="YourBuildName"></div>
@@ -257,6 +295,15 @@
             // NEW: Runic Wristbands controls
             const runicCheckbox = document.getElementById('has-runic-wristbands');
             const runicRarity = document.getElementById('runic-wristbands-rarity');
+            // NEW: Dragonking Axe controls
+            const dragonkingCheckbox = document.getElementById('has-dragonking-axe');
+            const dragonkingElement = document.getElementById('dragonking-axe-element');
+            const dragonkingGems = document.getElementById('dragonking-axe-gems');
+
+            // NEW: Runic Mace controls
+            const runicMaceCheckbox = document.getElementById('has-runic-mace');
+            const runicMaceRarity = document.getElementById('runic-mace-rarity');
+            const runicMaceElement = document.getElementById('runic-mace-element');
 
             // Initialization error handling (after DOM refs exist)
             try {
@@ -718,7 +765,7 @@
                     masteryBreakdown[spellElem].setMult = (1 + spellSetBonus);
                 }
 
-                // In-Fight Mastery Overrides (apply after set multiplier, before Runic effects)
+                // In-Fight Mastery Overrides (apply after set multiplier, before Runic/gear special effects)
                 ['Fire','Ice','Poison','Light','Dark'].forEach(el => {
                     const val = parseFloat(document.getElementById(`override-${el.toLowerCase()}-mastery-infight`).value) || 0;
                     if (val > 0) {
@@ -727,6 +774,24 @@
                         masteryBreakdown[el].final = val;
                     }
                 });
+
+                // NEW: Runic Mace — add N% of selected element in-fight mastery to Power
+                let runicMacePowerAdd = 0;
+                let runicMaceMeta = null;
+                if (runicMaceCheckbox && runicMaceCheckbox.checked) {
+                    const pctMap = { Rare: 0.10, Epic: 0.15, Legendary: 0.20, Mythic: 0.25 };
+                    const rarity = (runicMaceRarity && runicMaceRarity.value) || 'Mythic';
+                    const pct = pctMap[rarity] || 0;
+                    const rmElem = (runicMaceElement && runicMaceElement.value) || '';
+                    if (rmElem) {
+                        const masteryVal = parseFloat(totalStats[`${rmElem} Mastery`]) || 0; // in-fight value
+            const rawAdd = pct * masteryVal;
+                        // Post-multiplier: add raw amount after Power modifiers
+                        runicMacePowerAdd = rawAdd;
+                        totalStats['Power'] = (totalStats['Power'] || 0) + runicMacePowerAdd;
+                        runicMaceMeta = { rarity, pct, elem: rmElem, mastery: masteryVal, rawAdd };
+                    }
+                }
 
                 // NEW: Runic Wristbands — add N% of highest in-fight mastery to Crit Damage %
                 if (runicCheckbox && runicCheckbox.checked) {
@@ -739,6 +804,23 @@
                         if (v > highestInFight) highestInFight = v;
                     });
                     totalStats['Crit Damage %'] = (totalStats['Crit Damage %'] || 0) + (pct / 100) * highestInFight;
+                }
+
+                // NEW: Dragonking Axe — boosts <element> damage by 10% + 2% per <element> gem on board
+                // Applied as a multiplier to spell damage if spell element matches the selected element.
+        let dragonkingMultiplier = 1;
+        let dragonkingBaseMult = 1; // base 10% (if active)
+        let dragonkingGemMult = 1;  // 1 + 2% * gems (if active)
+        let dragonkingMeta = null;   // {enabled, elem, gems}
+                if (dragonkingCheckbox && dragonkingCheckbox.checked) {
+                    const dkElem = (dragonkingElement && dragonkingElement.value) || '';
+                    const dkGems = Math.max(0, Math.min(48, parseInt(dragonkingGems && dragonkingGems.value) || 0));
+                    if (spellElem && dkElem && spellElem === dkElem) {
+            dragonkingBaseMult = 1 + 0.10;
+            dragonkingGemMult = 1 + (0.02 * dkGems);
+            dragonkingMultiplier = 1 + 0.10 + (0.02 * dkGems);
+            dragonkingMeta = { enabled: true, elem: dkElem, gems: dkGems };
+                    }
                 }
 
                 // Overrides
@@ -828,33 +910,46 @@
                 if (selectedSpell && selectedSpell.name === 'Soul Siphon') {
                     skullGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
                 }
+                // Compute gem-based multiplier for certain spells
+                let gemMultiplier = 1;
+                let gemInfo = null; // {label, count, rate}
                 if (selectedSpell && selectedSpell.name === 'Night Blade') {
-                    const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                    baseSpellDmg *= (1 + 0.11 * darkGemsOnBoard);
+                    const count = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    gemMultiplier = 1 + 0.11 * count;
+                    gemInfo = { label: 'Dark Gems', count, rate: 0.11 };
                 } else if (selectedSpell && selectedSpell.name === 'Dark Firebolt') {
-                    const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                    baseSpellDmg *= (1 + 0.09 * darkGemsOnBoard);
+                    const count = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    gemMultiplier = 1 + 0.09 * count;
+                    gemInfo = { label: 'Dark Gems', count, rate: 0.09 };
                 } else if (selectedSpell && selectedSpell.name === 'Frost Bolt') {
-                    const iceGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                    baseSpellDmg *= (1 + 0.16 * iceGemsOnBoard);
+                    const count = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    gemMultiplier = 1 + 0.16 * count;
+                    gemInfo = { label: 'Ice Gems', count, rate: 0.16 };
                 } else if (selectedSpell && selectedSpell.name === 'Imp Raid') {
-                    const impGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                    baseSpellDmg *= (1 + 0.11 * impGemsOnBoard);
+                    const count = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    gemMultiplier = 1 + 0.11 * count;
+                    gemInfo = { label: 'Imp Gems', count, rate: 0.11 };
                 } else if (selectedSpell && selectedSpell.name === 'Purge') {
-                    // For Purge, use yellow gems on board
-                    const yellowGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                    baseSpellDmg *= (1 + 0.10 * yellowGemsOnBoard);
+                    const count = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    gemMultiplier = 1 + 0.10 * count;
+                    gemInfo = { label: 'Yellow Gems', count, rate: 0.10 };
                 } else if (selectedSpell && selectedSpell.name === 'Searing Strike') {
-                    const firePoisonGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                    baseSpellDmg *= (1 + 0.08 * firePoisonGemsOnBoard);
+                    const count = parseInt(document.getElementById('gems-on-board').value) || 0;
+                    gemMultiplier = 1 + 0.08 * count;
+                    gemInfo = { label: 'Fire & Poison Gems', count, rate: 0.08 };
                 } else if (selectedSpell && selectedSpell.name === 'Soul Siphon') {
-                    baseSpellDmg *= (1 + 0.10 * skullGemsOnBoard);
+                    const count = skullGemsOnBoard;
+                    gemMultiplier = 1 + 0.10 * count;
+                    gemInfo = { label: 'Skull Gems', count, rate: 0.10 };
                 } else if (selectedSpell && selectedSpell.gemBonus) {
-                    baseSpellDmg *= (1 + (gemsOnBoard * selectedSpell.gemBonus));
+                    const count = gemsOnBoard;
+                    gemMultiplier = 1 + (count * selectedSpell.gemBonus);
+                    gemInfo = { label: 'Gems', count, rate: selectedSpell.gemBonus };
                 }
+                baseSpellDmg *= gemMultiplier;
 
                 const strikePct = parseFloat(totalStats[strikeStat]) || 0;
-                let boostedSpellDmg = baseSpellDmg * (1 + (strikePct / 100));
+                let boostedSpellDmg = baseSpellDmg * (1 + (strikePct / 100)) * dragonkingMultiplier;
                 boostedSpellDmg *= eliteMultiplier * globalDamageMultiplier;
 
                 const colorAdvantage = {
@@ -885,7 +980,7 @@
                     masteryBreakdown[el].final = masteryBreakdown[el].inFight;
                 });
                 const elemForDisplay = spellElem || 'None';
-                displayResults({ totalStats, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg }, isElite, gearPower, basePower, offensePowerBonus, battleBonusMultiplier });
+                displayResults({ totalStats, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg, dragonkingMult: dragonkingMultiplier, dragonkingBaseMult, dragonkingGemMult, dragonkingMeta, gemMult: gemMultiplier, gemInfo }, isElite, gearPower, basePower, offensePowerBonus, battleBonusMultiplier, runicMacePowerAdd, runicMaceMeta });
                 } catch (err) {
                     console.error('Calculation error:', err);
                     if (resultsContainer) {
@@ -968,7 +1063,18 @@
                         if (overridePower > 0) {
                             breakdownText = `<span class='text-red-400'>OVERRIDE: ${overridePower.toFixed(2)}</span>`;
                         } else {
-                            breakdownText = `(${gearPowerDisp} Gear + ${basePowerDisp} Base) × (${battleMultDisp} Rank + ${offenseBonusDisp} Bonus)`;
+                            // Show Runic Mace as a post-multiplier addend
+                            const firstFactor = `${gearPowerDisp} Gear + ${basePowerDisp} Base`;
+                            let tail = '';
+                            if (data.runicMaceMeta && data.runicMacePowerAdd && data.runicMacePowerAdd > 0) {
+                                const rmRawNum = (data.runicMaceMeta.rawAdd || 0);
+                                const rmRaw = rmRawNum.toFixed(2);
+                                const rmPct = ((data.runicMaceMeta.pct || 0) * 100).toFixed(0);
+                                const rmElem = data.runicMaceMeta.elem || '';
+                                const rmMastery = (data.runicMaceMeta.mastery || 0).toFixed(2);
+                                tail = ` + ${rmRaw} Runic Mace (${rmPct}% of ${rmElem} Mastery ${rmMastery} post-mod)`;
+                            }
+                            breakdownText = `(${firstFactor}) × (${battleMultDisp} Rank + ${offenseBonusDisp} Bonus)${tail}`;
                         }
                         html += `<div class="flex justify-between items-center bg-gray-700 p-2 rounded-md stat-card"><span class="font-semibold text-gray-300">Power:</span> <span class="font-bold text-yellow-400">${totalPower} <span class="text-xs text-gray-400">${breakdownText}</span></span></div>`;
                     }
@@ -1019,7 +1125,13 @@
                             ];
                             if (b.inFightOverride) lines.push(`In-Fight Override = ${b.inFightOverride.toFixed(2)}`);
                             if (b.override !== null) lines.push(`Override = ${b.override.toFixed(2)}`);
-                            lines.push(`Final = ${b.final.toFixed(2)}`);
+                            if (b.inFightOverride) {
+                                lines.push(`Final = ${b.final.toFixed(2)} <span class='text-red-400'>(OVERRIDE: In-Fight)</span>`);
+                            } else if (b.override !== null) {
+                                lines.push(`Final = ${b.final.toFixed(2)} <span class='text-red-400'>(OVERRIDE)</span>`);
+                            } else {
+                                lines.push(`Final = ${b.final.toFixed(2)}`);
+                            }
                             html += `<div class="bg-gray-700 p-2 rounded-md mt-2"><div class="font-semibold ${getElementClass(el)}">${el} Mastery</div><div class="text-xs text-gray-300">${lines.join(' • ')}</div></div>`;
                         });
                     }
@@ -1040,44 +1152,45 @@
                     html += createStatDisplay('Critical Hit', data.spell.crit);
                     html += createStatDisplay('Average Hit', data.spell.avg);
 
-                    // Show additional damage from gems on board for Night Blade, Dark Firebolt, Frost Bolt, Imp Raid, Purge, Searing Strike, and Soul Siphon
-                    const selectedSpellName = document.getElementById('select-spell').value;
-                    if (selectedSpellName === 'Night Blade') {
-                        const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.11 * darkGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Dark Gems', bonusDmg, '', `(${darkGemsOnBoard} gems)`);
-                    } else if (selectedSpellName === 'Dark Firebolt') {
-                        const darkGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.09 * darkGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Dark Gems', bonusDmg, '', `(${darkGemsOnBoard} gems)`);
-                    } else if (selectedSpellName === 'Frost Bolt') {
-                        const iceGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.16 * iceGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Ice Gems', bonusDmg, '', `(${iceGemsOnBoard} gems)`);
-                    } else if (selectedSpellName === 'Imp Raid') {
-                        const impGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.11 * impGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Imp Gems', bonusDmg, '', `(${impGemsOnBoard} gems)`);
-                    } else if (selectedSpellName === 'Purge') {
-                        const yellowGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.10 * yellowGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Yellow Gems', bonusDmg, '', `(${yellowGemsOnBoard} gems)`);
-                    } else if (selectedSpellName === 'Searing Strike') {
-                        const firePoisonGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.08 * firePoisonGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Fire & Poison Gems', bonusDmg, '', `(${firePoisonGemsOnBoard} gems)`);
-                    } else if (selectedSpellName === 'Soul Siphon') {
-                        const skullGemsOnBoard = parseInt(document.getElementById('gems-on-board').value) || 0;
-                        const baseSpellDmg = data.spell.total / (1 + 0.10 * skullGemsOnBoard);
-                        const bonusDmg = data.spell.total - baseSpellDmg;
-                        html += createStatDisplay('Bonus from Skull Gems', bonusDmg, '', `(${skullGemsOnBoard} gems)`);
+                                        // Dragonking Axe note
+                                        if (data.spell.dragonkingMult && data.spell.dragonkingMult !== 1) {
+                                                const dk = data.spell;
+                                                const detail = (dk.dragonkingMeta)
+                                                    ? ` (10% base + 2% × ${dk.dragonkingMeta.gems} ${dk.dragonkingMeta.elem.toLowerCase()} gems)`
+                                                    : '';
+                                                html += `<div class="text-xs text-gray-300 mt-1">Dragonking Axe multiplier applied: <span class="text-yellow-400 font-semibold">× ${dk.dragonkingMult.toFixed(2)}</span>${detail}</div>`;
+                                        }
+
+                    // Gem-based multiplier note for certain spells
+                    if (data.spell.gemMult && data.spell.gemMult !== 1 && data.spell.gemInfo) {
+                        const gi = data.spell.gemInfo;
+                        const ratePct = (gi.rate * 100).toFixed(0);
+                        html += `<div class="text-xs text-gray-300">Gem multiplier applied: <span class="text-yellow-400 font-semibold">× ${data.spell.gemMult.toFixed(2)}</span> (${ratePct}% per ${gi.label.toLowerCase()} × ${gi.count})</div>`;
                     }
+
+                    // Unified breakdown: separate bonuses from Spell-provided gem scaling and other sources (e.g., Dragonking Axe)
+                    (function renderGemBreakdowns() {
+                        const total = data.spell.total || 0;
+                        // Spell gem bonus amount
+                        if (data.spell.gemMult && data.spell.gemMult !== 1 && data.spell.gemInfo) {
+                            const spellGemBonus = total - (total / data.spell.gemMult);
+                            html += createStatDisplay(`Bonus from ${data.spell.gemInfo.label} (Spell)`, spellGemBonus, '', `(${data.spell.gemInfo.count} gems @ ${(data.spell.gemInfo.rate*100).toFixed(0)}% each)`);
+                        }
+                        // Dragonking Axe gem vs base portions
+                        if (data.spell.dragonkingMult && data.spell.dragonkingMult !== 1 && data.spell.dragonkingMeta) {
+                            const baseWithoutDK = total / data.spell.dragonkingMult; // remove full DK effect
+                            const dkGemPct = (data.spell.dragonkingGemMult ? (data.spell.dragonkingGemMult - 1) : 0); // linear 2% per gem
+                            const dkBasePct = (data.spell.dragonkingMeta ? 0.10 : 0);
+                            if (dkGemPct > 0) {
+                                const dkGemBonus = baseWithoutDK * dkGemPct;
+                                html += createStatDisplay(`Bonus from ${data.spell.dragonkingMeta.elem} Gems (Dragonking Axe)`, dkGemBonus, '', `(${data.spell.dragonkingMeta.gems} gems @ 2% each)`);
+                            }
+                            if (dkBasePct > 0) {
+                                const dkBaseBonus = baseWithoutDK * dkBasePct;
+                                html += createStatDisplay('Dragonking Axe Base Bonus', dkBaseBonus, '', '(+10%)');
+                            }
+                        }
+                    })();
                 
                     console.log('DEBUG: html to inject:', html);
                     resultsContainer.innerHTML = html;
@@ -1119,7 +1232,11 @@
                 ].forEach(id => buildData.baseStats[id] = document.getElementById(id).value);
                 ['enemy-armor', 'enemy-resistance', 'skulls-matched', 'spell-modifier', 'spell-element', 'is-elite-enemy', 'spell-crit-chance', 'spell-crit-damage', 'sb-fire', 'sb-ice', 'sb-poison', 'sb-light', 'sb-dark', 'equipped-spells-count', 'select-spell', 'spellbook-level', 'spellbook-modifier', 'gems-on-board', 'enemy-color', 'enemy-block-chance', 'enemy-block-reduction', 'select-enemy', 'enemy-level', 'enemy-type', 'enemy-damage-type', 'enemy-damage', 'enemy-health', 
                  // NEW:
-                 'has-runic-wristbands', 'runic-wristbands-rarity'
+                 'has-runic-wristbands', 'runic-wristbands-rarity',
+                 // Runic Mace
+                 'has-runic-mace','runic-mace-rarity','runic-mace-element',
+                 // Dragonking Axe
+                 'has-dragonking-axe','dragonking-axe-element','dragonking-axe-gems'
                 ].forEach(id => {
                     const el = document.getElementById(id);
                     buildData.calcInputs[id] = el.type === 'checkbox' ? el.checked : el.value;
