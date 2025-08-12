@@ -755,6 +755,7 @@
                 });
 
                 // Add overrides for Crit Chance %, Crit Damage %, Elite Damage %, Extra Damage %
+
                 // Weapon Damage override
                 const overrideWeaponDamage = parseFloat(document.getElementById('override-weapon-damage').value) || 0;
                 if (overrideWeaponDamage > 0) totalStats['Weapon Damage'] = overrideWeaponDamage;
@@ -769,6 +770,14 @@
 
                 const overrideExtraDamage = parseFloat(document.getElementById('override-extra-damage').value) || 0;
                 if (overrideExtraDamage > 0) totalStats['Global Damage'] = overrideExtraDamage;
+
+                // Element Strike overrides
+                ['Fire','Ice','Poison','Light','Dark'].forEach(el => {
+                    const strikeOverride = parseFloat(document.getElementById(`override-${el.toLowerCase()}-strike`).value) || 0;
+                    if (strikeOverride > 0) {
+                        totalStats[`${el} Strike`] = strikeOverride;
+                    }
+                });
 
 
                 const skulls = parseInt(document.getElementById('skulls-matched').value) || 0;
