@@ -228,6 +228,10 @@
                         </select>
                         <label for="dragonking-axe-gems" class="text-sm text-gray-300 ml-2">Gems on Board</label>
                         <input id="dragonking-axe-gems" type="number" min="0" max="48" value="0" class="w-24 bg-gray-700 text-white p-2 rounded-md">
+                        <label class="flex items-center gap-2 text-xs text-gray-300 ml-2">
+                            <input id="dragonking-axe-use-spell-gems" type="checkbox" checked class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
+                            Use Spell Gems on Board
+                        </label>
                         <span class="text-xs text-gray-400">Boosts selected element damage by 10% + 2% per element gem (0–48)</span>
                     </div>
                 </div>
@@ -299,6 +303,7 @@
             const dragonkingCheckbox = document.getElementById('has-dragonking-axe');
             const dragonkingElement = document.getElementById('dragonking-axe-element');
             const dragonkingGems = document.getElementById('dragonking-axe-gems');
+            const dragonkingUseSpellGems = document.getElementById('dragonking-axe-use-spell-gems');
 
             // NEW: Runic Mace controls
             const runicMaceCheckbox = document.getElementById('has-runic-mace');
@@ -568,6 +573,23 @@
                     document.getElementById('spell-element').value = spell.color;
                 }
             });
+            // Keep DK gems in sync with Spell Gems when checkbox is enabled
+            const syncDKGemsWithSpell = () => {
+                if (!dragonkingUseSpellGems) return;
+                const spellGemsEl = document.getElementById('gems-on-board');
+                if (dragonkingUseSpellGems.checked) {
+                    dragonkingGems.value = spellGemsEl.value;
+                    dragonkingGems.disabled = true;
+                } else {
+                    dragonkingGems.disabled = false;
+                }
+            };
+            if (dragonkingUseSpellGems) {
+                dragonkingUseSpellGems.addEventListener('change', syncDKGemsWithSpell);
+                document.getElementById('gems-on-board').addEventListener('input', syncDKGemsWithSpell);
+                // initial sync
+                syncDKGemsWithSpell();
+            }
             
             function updateEnemyStats() {
                 const enemyName = selectEnemy.value;
@@ -814,7 +836,12 @@
         let dragonkingMeta = null;   // {enabled, elem, gems}
                 if (dragonkingCheckbox && dragonkingCheckbox.checked) {
                     const dkElem = (dragonkingElement && dragonkingElement.value) || '';
-                    const dkGems = Math.max(0, Math.min(48, parseInt(dragonkingGems && dragonkingGems.value) || 0));
+                    let dkGems = 0;
+                    if (dragonkingUseSpellGems && dragonkingUseSpellGems.checked) {
+                        dkGems = Math.max(0, Math.min(48, parseInt(document.getElementById('gems-on-board').value) || 0));
+                    } else {
+                        dkGems = Math.max(0, Math.min(48, parseInt(dragonkingGems && dragonkingGems.value) || 0));
+                    }
                     if (spellElem && dkElem && spellElem === dkElem) {
             dragonkingBaseMult = 1 + 0.10;
             dragonkingGemMult = 1 + (0.02 * dkGems);
@@ -1236,7 +1263,7 @@
                  // Runic Mace
                  'has-runic-mace','runic-mace-rarity','runic-mace-element',
                  // Dragonking Axe
-                 'has-dragonking-axe','dragonking-axe-element','dragonking-axe-gems'
+                 'has-dragonking-axe','dragonking-axe-element','dragonking-axe-gems','dragonking-axe-use-spell-gems'
                 ].forEach(id => {
                     const el = document.getElementById(id);
                     buildData.calcInputs[id] = el.type === 'checkbox' ? el.checked : el.value;
