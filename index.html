@@ -215,6 +215,21 @@
                         <span class="text-xs text-gray-400">Adds 10|15|20|25% of selected element Mastery to Power</span>
                     </div>
 
+                    <!-- Night Band -->
+                    <div class="flex flex-wrap items-center gap-3 mt-4">
+                        <input id="has-night-band" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
+                        <label for="has-night-band" class="text-sm text-gray-300">Night Band equipped</label>
+                        <select id="night-band-rarity" class="bg-gray-700 text-white p-2 rounded-md custom-select">
+                            <option value="Rare">Rare (2%)</option>
+                            <option value="Epic">Epic (3%)</option>
+                            <option value="Legendary">Legendary (4%)</option>
+                            <option value="Mythic" selected>Mythic (5%)</option>
+                        </select>
+                        <label for="night-band-matches" class="text-sm text-gray-300 ml-2">How many match 4's?</label>
+                        <input id="night-band-matches" type="number" min="0" step="1" value="0" class="w-24 bg-gray-700 text-white p-2 rounded-md">
+                        <span class="text-xs text-gray-400">Gain 2|3|4|5% Dark Damage Bonus when matching 4+ Purple Gems</span>
+                    </div>
+
                     <!-- Dragonking Axe -->
                     <div class="flex flex-wrap items-center gap-3 mt-4">
                         <input id="has-dragonking-axe" type="checkbox" class="h-4 w-4 rounded border-gray-500 bg-gray-600 text-yellow-500 focus:ring-yellow-600">
@@ -309,6 +324,10 @@
             const runicMaceCheckbox = document.getElementById('has-runic-mace');
             const runicMaceRarity = document.getElementById('runic-mace-rarity');
             const runicMaceElement = document.getElementById('runic-mace-element');
+            // NEW: Night Band controls
+            const nightBandCheckbox = document.getElementById('has-night-band');
+            const nightBandRarity = document.getElementById('night-band-rarity');
+            const nightBandMatches = document.getElementById('night-band-matches');
 
             // Initialization error handling (after DOM refs exist)
             try {
@@ -829,11 +848,13 @@
                 }
 
                 // NEW: Dragonking Axe — boosts <element> damage by 10% + 2% per <element> gem on board
-                // Applied as a multiplier to spell damage if spell element matches the selected element.
+                // Applied to spell damage if spell element matches the selected element.
         let dragonkingMultiplier = 1;
-        let dragonkingBaseMult = 1; // base 10% (if active)
-        let dragonkingGemMult = 1;  // 1 + 2% * gems (if active)
+        let dragonkingBaseMult = 1; // base 10% (if active) — for note
+        let dragonkingGemMult = 1;  // 1 + 2% * gems (if active) — for note
         let dragonkingMeta = null;   // {enabled, elem, gems}
+        let dkBasePct = 0; // 10 if active
+        let dkGemPct = 0;  // 2 per matching gem if active
                 if (dragonkingCheckbox && dragonkingCheckbox.checked) {
                     const dkElem = (dragonkingElement && dragonkingElement.value) || '';
                     let dkGems = 0;
@@ -843,9 +864,11 @@
                         dkGems = Math.max(0, Math.min(48, parseInt(dragonkingGems && dragonkingGems.value) || 0));
                     }
                     if (spellElem && dkElem && spellElem === dkElem) {
+            dkBasePct = 10;
+            dkGemPct = 2 * dkGems;
             dragonkingBaseMult = 1 + 0.10;
             dragonkingGemMult = 1 + (0.02 * dkGems);
-            dragonkingMultiplier = 1 + 0.10 + (0.02 * dkGems);
+            dragonkingMultiplier = 1 + (dkBasePct + dkGemPct) / 100;
             dragonkingMeta = { enabled: true, elem: dkElem, gems: dkGems };
                     }
                 }
@@ -904,7 +927,10 @@
                 const enemyColor = document.getElementById('enemy-color').value;
 
                 const eliteMultiplier = isElite ? (1 + (totalStats['Mighty'] / 100)) : 1;
-                const globalDamageMultiplier = 1 + citadelBonuses['Global Damage'] - 1;
+                // Combine citadel Global Damage bonus with Extra Damage % override (if any)
+                const globalDamageFromCitadel = ((citadelBonuses['Global Damage'] || 1) - 1); // decimal
+                const globalDamageFromOverride = ((totalStats['Global Damage'] || 0) / 100);   // decimal
+                const globalDamageMultiplier = 1 + globalDamageFromCitadel + globalDamageFromOverride;
 
                 const cappedCritChanceForCalc = Math.min(totalStats['Crit Chance %'], 80);
 
@@ -976,7 +1002,21 @@
                 baseSpellDmg *= gemMultiplier;
 
                 const strikePct = parseFloat(totalStats[strikeStat]) || 0;
-                let boostedSpellDmg = baseSpellDmg * (1 + (strikePct / 100)) * dragonkingMultiplier;
+                // Night Band: Dark Damage Bonus stacks per match-4
+                let nightBandBonusPct = 0;
+                let nightBandMeta = null;
+                if (nightBandCheckbox && nightBandCheckbox.checked && spellElem === 'Dark') {
+                    const pctMapNB = { Rare: 2, Epic: 3, Legendary: 4, Mythic: 5 };
+                    const rarityNB = (nightBandRarity && nightBandRarity.value) || 'Mythic';
+                    const perStack = pctMapNB[rarityNB] || 0;
+                    const stacks = Math.max(0, parseInt(nightBandMatches && nightBandMatches.value) || 0);
+                    nightBandBonusPct = perStack * stacks;
+                    nightBandMeta = { rarity: rarityNB, perStack, stacks, totalPct: nightBandBonusPct };
+                }
+
+                // Combine Dragonking (base + gems) and Night Band additively — no cross-term
+                const externalPct = (nightBandBonusPct || 0) + (dkBasePct || 0) + (dkGemPct || 0);
+                let boostedSpellDmg = baseSpellDmg * (1 + (strikePct / 100)) * (1 + externalPct / 100);
                 boostedSpellDmg *= eliteMultiplier * globalDamageMultiplier;
 
                 const colorAdvantage = {
@@ -1007,7 +1047,7 @@
                     masteryBreakdown[el].final = masteryBreakdown[el].inFight;
                 });
                 const elemForDisplay = spellElem || 'None';
-                displayResults({ totalStats, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg, dragonkingMult: dragonkingMultiplier, dragonkingBaseMult, dragonkingGemMult, dragonkingMeta, gemMult: gemMultiplier, gemInfo }, isElite, gearPower, basePower, offensePowerBonus, battleBonusMultiplier, runicMacePowerAdd, runicMaceMeta });
+                displayResults({ totalStats, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg, dragonkingMult: dragonkingMultiplier, dragonkingBaseMult, dragonkingGemMult, dragonkingMeta, dkBasePct, dkGemPct, externalPct, gemMult: gemMultiplier, gemInfo, nightBandPct: nightBandBonusPct, nightBandMeta }, isElite, gearPower, basePower, offensePowerBonus, battleBonusMultiplier, runicMacePowerAdd, runicMaceMeta });
                 } catch (err) {
                     console.error('Calculation error:', err);
                     if (resultsContainer) {
@@ -1122,6 +1162,15 @@
                         }
                     });
 
+                    // Derived: Your Block Chance % and Block Reduction % (from total Block)
+                    if (data.totalStats['Block'] && data.totalStats['Block'] > 0) {
+                        const effBlock = data.totalStats['Block'];
+                        const rawPct = effBlock / 10; // conversion rule
+                        const cappedPct = Math.min(rawPct, 80);
+                        html += createStatDisplay('Your Block Chance %', cappedPct, '%', rawPct > 80 ? '(capped at 80%)' : '');
+                        html += createStatDisplay('Your Block Reduction %', cappedPct, '%', rawPct > 80 ? '(capped at 80%)' : '');
+                    }
+
                     // Render per-element Mastery and In-Fight Mastery summaries
                     if (data.masteryBreakdown) {
                         html += createSectionHeader('Elemental Mastery Totals');
@@ -1179,14 +1228,16 @@
                     html += createStatDisplay('Critical Hit', data.spell.crit);
                     html += createStatDisplay('Average Hit', data.spell.avg);
 
-                                        // Dragonking Axe note
-                                        if (data.spell.dragonkingMult && data.spell.dragonkingMult !== 1) {
-                                                const dk = data.spell;
-                                                const detail = (dk.dragonkingMeta)
-                                                    ? ` (10% base + 2% × ${dk.dragonkingMeta.gems} ${dk.dragonkingMeta.elem.toLowerCase()} gems)`
-                                                    : '';
-                                                html += `<div class="text-xs text-gray-300 mt-1">Dragonking Axe multiplier applied: <span class="text-yellow-400 font-semibold">× ${dk.dragonkingMult.toFixed(2)}</span>${detail}</div>`;
-                                        }
+                    // Night Band note removed; contribution merged into unified breakdown below
+
+                    // Dragonking Axe note
+                    if (data.spell.dragonkingMult && data.spell.dragonkingMult !== 1) {
+                        const dk = data.spell;
+                        const detail = (dk.dragonkingMeta)
+                            ? ` (${(dk.dkBasePct||0).toFixed(0)}% base + ${(dk.dkGemPct||0).toFixed(0)}% from ${dk.dragonkingMeta.elem.toLowerCase()} gems)`
+                            : '';
+                        html += `<div class="text-xs text-gray-300 mt-1">Dragonking Axe bonus applied: <span class="text-yellow-400 font-semibold">+ ${(100*(dk.dragonkingMult-1)).toFixed(0)}%</span>${detail}</div>`;
+                    }
 
                     // Gem-based multiplier note for certain spells
                     if (data.spell.gemMult && data.spell.gemMult !== 1 && data.spell.gemInfo) {
@@ -1198,24 +1249,36 @@
                     // Unified breakdown: separate bonuses from Spell-provided gem scaling and other sources (e.g., Dragonking Axe)
                     (function renderGemBreakdowns() {
                         const total = data.spell.total || 0;
-                        // Spell gem bonus amount
+                        // Spell gem bonus amount (internal spell scaling)
                         if (data.spell.gemMult && data.spell.gemMult !== 1 && data.spell.gemInfo) {
                             const spellGemBonus = total - (total / data.spell.gemMult);
                             html += createStatDisplay(`Bonus from ${data.spell.gemInfo.label} (Spell)`, spellGemBonus, '', `(${data.spell.gemInfo.count} gems @ ${(data.spell.gemInfo.rate*100).toFixed(0)}% each)`);
                         }
-                        // Dragonking Axe gem vs base portions
-                        if (data.spell.dragonkingMult && data.spell.dragonkingMult !== 1 && data.spell.dragonkingMeta) {
-                            const baseWithoutDK = total / data.spell.dragonkingMult; // remove full DK effect
-                            const dkGemPct = (data.spell.dragonkingGemMult ? (data.spell.dragonkingGemMult - 1) : 0); // linear 2% per gem
-                            const dkBasePct = (data.spell.dragonkingMeta ? 0.10 : 0);
-                            if (dkGemPct > 0) {
-                                const dkGemBonus = baseWithoutDK * dkGemPct;
+                        // External bonuses (Dragonking base + gems + Night Band) are additive; compute from base-before-external
+                        const extPct = (data.spell.externalPct || 0);
+                        if (extPct !== 0) {
+                            const baseBeforeExternal = total / (1 + extPct / 100);
+                            // DK gems
+                            const dkGemPct = data.spell.dkGemPct || 0;
+                            if (dkGemPct > 0 && data.spell.dragonkingMeta) {
+                                const dkGemBonus = baseBeforeExternal * (dkGemPct / 100);
                                 html += createStatDisplay(`Bonus from ${data.spell.dragonkingMeta.elem} Gems (Dragonking Axe)`, dkGemBonus, '', `(${data.spell.dragonkingMeta.gems} gems @ 2% each)`);
                             }
+                            // DK base
+                            const dkBasePct = data.spell.dkBasePct || 0;
                             if (dkBasePct > 0) {
-                                const dkBaseBonus = baseWithoutDK * dkBasePct;
-                                html += createStatDisplay('Dragonking Axe Base Bonus', dkBaseBonus, '', '(+10%)');
+                                const dkBaseBonus = baseBeforeExternal * (dkBasePct / 100);
+                                html += createStatDisplay('Dragonking Axe Base Bonus', dkBaseBonus, '', `(+${dkBasePct.toFixed(0)}%)`);
                             }
+                            // Night Band
+                            const nbPct = (data.spell.nightBandPct || 0);
+                            if (nbPct > 0 && data.spell.elem === 'Dark') {
+                                const nbBonus = baseBeforeExternal * (nbPct / 100);
+                                const stacksInfo = (data.spell.nightBandMeta && data.spell.nightBandMeta.stacks) ? ` (${data.spell.nightBandMeta.stacks} stacks @ +${(data.spell.nightBandMeta.perStack||0)}% each)` : ` (+${nbPct.toFixed(0)}%)`;
+                                html += createStatDisplay('Night Band Bonus (Dark Damage %)', nbBonus, '', stacksInfo);
+                            }
+                            // External total summary
+                            html += `<div class="text-xs text-gray-300">External Damage Bonus total: <span class="text-yellow-400 font-semibold">+ ${extPct.toFixed(0)}%</span></div>`;
                         }
                     })();
                 
@@ -1260,6 +1323,8 @@
                 ['enemy-armor', 'enemy-resistance', 'skulls-matched', 'spell-modifier', 'spell-element', 'is-elite-enemy', 'spell-crit-chance', 'spell-crit-damage', 'sb-fire', 'sb-ice', 'sb-poison', 'sb-light', 'sb-dark', 'equipped-spells-count', 'select-spell', 'spellbook-level', 'spellbook-modifier', 'gems-on-board', 'enemy-color', 'enemy-block-chance', 'enemy-block-reduction', 'select-enemy', 'enemy-level', 'enemy-type', 'enemy-damage-type', 'enemy-damage', 'enemy-health', 
                  // NEW:
                  'has-runic-wristbands', 'runic-wristbands-rarity',
+                 // Night Band
+                 'has-night-band','night-band-rarity','night-band-matches',
                  // Runic Mace
                  'has-runic-mace','runic-mace-rarity','runic-mace-element',
                  // Dragonking Axe
