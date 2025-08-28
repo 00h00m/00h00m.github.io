@@ -1047,7 +1047,8 @@
                     masteryBreakdown[el].final = masteryBreakdown[el].inFight;
                 });
                 const elemForDisplay = spellElem || 'None';
-                displayResults({ totalStats, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg, dragonkingMult: dragonkingMultiplier, dragonkingBaseMult, dragonkingGemMult, dragonkingMeta, dkBasePct, dkGemPct, externalPct, gemMult: gemMultiplier, gemInfo, nightBandPct: nightBandBonusPct, nightBandMeta }, isElite, gearPower, basePower, offensePowerBonus, battleBonusMultiplier, runicMacePowerAdd, runicMaceMeta });
+                const derivedHealth = (totalStats['Vitality'] || 0) * 10;
+                displayResults({ totalStats, derivedHealth, masteryBreakdown, skull: { final: finalSkullDmg, crit: critSkullDmg, avg: avgSkullDmg, total: baseSkullDmg }, spell: { final: finalSpellDmg, crit: critSpellDmg, avg: avgSpellDmg, elem: elemForDisplay, total: boostedSpellDmg, dragonkingMult: dragonkingMultiplier, dragonkingBaseMult, dragonkingGemMult, dragonkingMeta, dkBasePct, dkGemPct, externalPct, gemMult: gemMultiplier, gemInfo, nightBandPct: nightBandBonusPct, nightBandMeta }, isElite, gearPower, basePower, offensePowerBonus, battleBonusMultiplier, runicMacePowerAdd, runicMaceMeta });
                 } catch (err) {
                     console.error('Calculation error:', err);
                     if (resultsContainer) {
@@ -1145,7 +1146,7 @@
                         }
                         html += `<div class="flex justify-between items-center bg-gray-700 p-2 rounded-md stat-card"><span class="font-semibold text-gray-300">Power:</span> <span class="font-bold text-yellow-400">${totalPower} <span class="text-xs text-gray-400">${breakdownText}</span></span></div>`;
                     }
-                    // Other stats
+                    // Other stats (insert Health right after Vitality)
                     Object.entries(data.totalStats).forEach(([key, value]) => {
                         if (value > 0 && key !== 'Block' && key !== 'Global Damage' && key !== 'Power' && key !== 'Crit Damage %') {
                             if (key === 'Crit Chance %') {
@@ -1153,6 +1154,14 @@
                                 const overage = Math.max(0, value - 80);
                                 const note = overage > 0 ? `(+${overage.toFixed(2)}% over cap)` : '';
                                 html += createStatDisplay(key, cappedValue, '%', note);
+                            } else if (key === 'Vitality') {
+                                // Show Vitality then Health
+                                const attrInfo = fullAttributeList.find(a => a.name === key);
+                                const unit = (attrInfo && attrInfo.type === 'percent') || key.includes('%') ? '%' : '';
+                                const note = overridesIndicator.hasOwnProperty(key) ? 'OVERRIDE' : '';
+                                html += createStatDisplay(key, value, unit, note);
+                                const healthVal = (data.derivedHealth || 0);
+                                html += createStatDisplay('Health', healthVal, '', '(= 10 × Vitality)');
                             } else {
                                 const attrInfo = fullAttributeList.find(a => a.name === key);
                                 const unit = (attrInfo && attrInfo.type === 'percent') || key.includes('%') ? '%' : '';
