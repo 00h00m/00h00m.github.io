@@ -88,15 +88,15 @@
                                 <div><label for="override-poison-mastery" class="text-xs element-poison font-bold">Poison Mastery</label><input type="number" id="override-poison-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
                                 <div><label for="override-light-mastery" class="text-xs element-light font-bold">Light Mastery</label><input type="number" id="override-light-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
                                 <div><label for="override-dark-mastery" class="text-xs element-dark font-bold">Dark Mastery</label><input type="number" id="override-dark-mastery" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-crit-chance" class="text-xs text-gray-400">Crit Chance %</label><input type="number" id="override-crit-chance" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-crit-damage" class="text-xs text-gray-400">Crit Damage %</label><input type="number" id="override-crit-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-crit-chance" class="text-xs text-gray-400">Critical Hit Chance %</label><input type="number" id="override-crit-chance" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-crit-damage" class="text-xs text-gray-400">Critical Hit Damage %</label><input type="number" id="override-crit-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
                                 <div><label for="override-elite-damage" class="text-xs text-gray-400">Elite Damage %</label><input type="number" id="override-elite-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
                                 <div><label for="override-extra-damage" class="text-xs text-gray-400">Extra Damage %</label><input type="number" id="override-extra-damage" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-fire-strike" class="text-xs element-fire font-bold">Fire Strike %</label><input type="number" id="override-fire-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-ice-strike" class="text-xs element-ice font-bold">Ice Strike %</label><input type="number" id="override-ice-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-poison-strike" class="text-xs element-poison font-bold">Poison Strike %</label><input type="number" id="override-poison-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-light-strike" class="text-xs element-light font-bold">Light Strike %</label><input type="number" id="override-light-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
-                                <div><label for="override-dark-strike" class="text-xs element-dark font-bold">Dark Strike %</label><input type="number" id="override-dark-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-fire-strike" class="text-xs element-fire font-bold">Fire Damage %</label><input type="number" id="override-fire-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-ice-strike" class="text-xs element-ice font-bold">Ice Damage %</label><input type="number" id="override-ice-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-poison-strike" class="text-xs element-poison font-bold">Poison Damage %</label><input type="number" id="override-poison-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-light-strike" class="text-xs element-light font-bold">Light Damage %</label><input type="number" id="override-light-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
+                                <div><label for="override-dark-strike" class="text-xs element-dark font-bold">Dark Damage %</label><input type="number" id="override-dark-strike" class="mt-1 w-full bg-gray-600 p-1 rounded-md text-sm" placeholder="0"></div>
                                 <!-- In-Fight Mastery Overrides -->
                                 <div class="col-span-2 mt-2">
                                     <span class="text-xs font-semibold text-yellow-300">In-Fight Mastery Overrides</span>
@@ -1201,13 +1201,14 @@
                         html += `<div class="flex justify-between items-center bg-gray-700 p-2 rounded-md stat-card"><span class="font-semibold text-gray-300">Power:</span> <span class="font-bold text-yellow-400">${totalPower} <span class="text-xs text-gray-400">${breakdownText}</span></span></div>`;
                     }
                     // Other stats (insert Health right after Vitality)
+                    const displayRename = { 'Mighty': 'Elite Damage', 'Heal': 'Healing Boost', 'Rich': 'Gold Bonus' };
                     Object.entries(data.totalStats).forEach(([key, value]) => {
                         if (value > 0 && key !== 'Block' && key !== 'Global Damage' && key !== 'Power' && key !== 'Crit Damage %') {
                             if (key === 'Crit Chance %') {
                                 const cappedValue = Math.min(value, 80);
                                 const overage = Math.max(0, value - 80);
                                 const note = overage > 0 ? `(+${overage.toFixed(2)}% over cap)` : '';
-                                html += createStatDisplay(key, cappedValue, '%', note);
+                                html += createStatDisplay(displayRename[key] || key, cappedValue, '%', note);
                             } else if (key === 'Vitality') {
                                 // Show Vitality then Health
                                 const attrInfo = fullAttributeList.find(a => a.name === key);
@@ -1220,7 +1221,7 @@
                                 const attrInfo = fullAttributeList.find(a => a.name === key);
                                 const unit = (attrInfo && attrInfo.type === 'percent') || key.includes('%') ? '%' : '';
                                 const note = overridesIndicator.hasOwnProperty(key) ? 'OVERRIDE' : '';
-                                html += createStatDisplay(key, value, unit, note);
+                                html += createStatDisplay(displayRename[key] || key, value, unit, note);
                             }
                         }
                     });
