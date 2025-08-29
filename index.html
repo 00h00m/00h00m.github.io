@@ -337,19 +337,24 @@
                 console.error('Initialization error:', e);
             }
 
+            // Attribute names now reflect their actual effects directly.
             const attributes = [
                 { name: 'Weapon damage', type: 'flat' }, { name: 'Armor', type: 'flat' }, { name: 'Resistance', type: 'flat' }, { name: 'Block', type: 'flat' },
-                { name: 'Strong', type: 'flat' }, { name: 'Life', type: 'flat' }, { name: 'Strike', type: 'percent' },
-                { name: 'Ward', type: 'percent' }, { name: 'Pact', type: 'percent' }, { name: 'Guard', type: 'percent' }, { name: 'Solid', type: 'percent' },
-                { name: 'Aim', type: 'percent' }, { name: 'Mighty', type: 'percent' }, { name: 'Brave', type: 'percent' }, { name: 'Smart', type: 'percent' },
-                { name: 'Rich', type: 'percent' }, { name: 'Parry', type: 'percent' }, { name: 'Cover', type: 'percent' }, { name: 'Heal', type: 'percent' },
-                { name: 'Speed', type: 'flat' }, { name: 'Cleave', type: 'percent' },
+                { name: 'Power', type: 'flat' }, { name: 'Vitality', type: 'flat' }, { name: 'Damage', type: 'percent' },
+                { name: 'Damage Resistance', type: 'percent' }, { name: 'Starting Mana', type: 'percent' }, { name: 'Block Chance Bonus', type: 'percent' }, { name: 'Block Damage Reduction', type: 'percent' },
+                { name: 'Critical Hit Chance %', type: 'percent' }, { name: 'Elite Damage', type: 'percent' }, { name: 'Elite Damage Protection', type: 'percent' }, { name: 'Experience Bonus', type: 'percent' },
+                { name: 'Gold Bonus', type: 'percent' }, { name: 'Melee Resistance', type: 'percent' }, { name: 'Missile Resistance', type: 'percent' }, { name: 'Healing Boost', type: 'percent' },
+                { name: 'Speed', type: 'flat' }, { name: 'Critical Hit Damage %', type: 'percent' },
             ];
             
             const maxValues = {
-                'Weapon damage': 9894, 'Armor': 6092, 'Resistance': 6092, 'Block': 768, 'Strong': 308, 'Life': 308, 'Magic': 246.2, 'Strike': 15.2,
-                'Ward': 15.2, 'Pact': 15.2, 'Guard': 15.2, 'Solid': 15.2, 'Aim': 15.2, 'Mighty': 15.2, 'Brave': 15.2, 'Smart': 15.2, 'Rich': 15.2, 'Parry': 15.2,
-                'Cover': 15.2, 'Heal': 30, 'Speed': 45.6, 'Cleave': 152, 'Mastery': 246.2
+                'Weapon damage': 9894, 'Armor': 6092, 'Resistance': 6092, 'Block': 768,
+                'Power': 308, 'Vitality': 308, 'Magic': 246.2,
+                'Damage': 15.2, 'Damage Resistance': 15.2, 'Starting Mana': 15.2,
+                'Block Chance Bonus': 15.2, 'Block Damage Reduction': 15.2,
+                'Critical Hit Chance %': 15.2, 'Elite Damage': 15.2, 'Elite Damage Protection': 15.2,
+                'Experience Bonus': 15.2, 'Gold Bonus': 15.2, 'Melee Resistance': 15.2, 'Missile Resistance': 15.2,
+                'Healing Boost': 30, 'Speed': 45.6, 'Critical Hit Damage %': 152, 'Mastery': 246.2
             };
 
             const elements = ['Fire', 'Ice', 'Poison', 'Light', 'Dark'];
@@ -361,7 +366,25 @@
                 { id: 'necklace', name: 'Necklace', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' }, { id: 'ring1', name: 'Ring 1', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' },
                 { id: 'ring2', name: 'Ring 2', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' }, { id: 'belt', name: 'Belt', type: 'other', attr0: { name: 'Resistance', value: 6092 }, attr1: 'Strong' }
             ];
-            const statMap = { 'Strong': 'Power', 'Life': 'Vitality', 'Aim': 'Crit Chance %', 'Cleave': 'Crit Damage %', 'Weapon damage': 'Weapon Damage' };
+            // Map attribute display names (and legacy names) to internal stat keys.
+            const statMap = {
+                // Flat
+                'Weapon damage': 'Weapon Damage', 'Power': 'Power', 'Vitality': 'Vitality',
+                // Critical
+                'Critical Hit Chance %': 'Crit Chance %', 'Critical Hit Damage %': 'Crit Damage %',
+                // Elite
+                'Elite Damage': 'Mighty', 'Elite Damage Protection': 'Brave',
+                // Block related
+                'Block Chance Bonus': 'Guard', 'Block Damage Reduction': 'Solid',
+                // Other percents
+                'Experience Bonus': 'Smart', 'Gold Bonus': 'Rich', 'Healing Boost': 'Heal',
+                'Melee Resistance': 'Parry', 'Missile Resistance': 'Cover',
+                'Starting Mana': 'Pact',
+                // Elemental generated (Damage / Damage Resistance handled later)
+                // Legacy names for backward compatibility (saved builds)
+                'Strong': 'Power', 'Life': 'Vitality', 'Aim': 'Crit Chance %', 'Cleave': 'Crit Damage %',
+                'Mighty': 'Mighty', 'Brave': 'Brave', 'Guard': 'Guard', 'Solid': 'Solid', 'Smart': 'Smart', 'Rich': 'Rich', 'Parry': 'Parry', 'Cover': 'Cover', 'Heal': 'Heal', 'Pact': 'Pact', 'Strike': 'Strike', 'Ward': 'Ward'
+            };
             
             const citadelData = [
                 { category: 'Offense', stats: [ { name: 'Power', bonus: 0.02, max: 72, target: 'Power', 'default': 62 }, { name: 'Starting Mana', bonus: 0.01, max: 50, target: 'Pact' }, { name: 'Damage Bonus', bonus: 0.002, max: 50, target: 'Global Damage' } ] },
@@ -495,7 +518,7 @@
             
             const fullAttributeList = [];
             attributes.forEach(attr => {
-                if (['Strike', 'Ward', 'Pact'].includes(attr.name)) {
+                if (['Damage','Damage Resistance','Starting Mana'].includes(attr.name)) {
                     elements.forEach(el => fullAttributeList.push({ ...attr, name: `${el} ${attr.name}` }));
                 } else {
                     fullAttributeList.push(attr);
@@ -537,9 +560,9 @@
                 attr1Input.value = maxValues[slot.attr1] || 0;
 
                 const defaults = {
-                    2: slot.type === 'armor' ? 'Strong' : 'Aim',
-                    3: 'Cleave',
-                    4: 'Mighty',
+                    2: slot.type === 'armor' ? 'Power' : 'Critical Hit Chance %',
+                    3: 'Critical Hit Damage %',
+                    4: 'Elite Damage',
                     5: 'Poison Mastery'
                 };
 
@@ -551,8 +574,16 @@
                     const defaultAttrName = defaults[i];
                     if (defaultAttrName) {
                         select.value = defaultAttrName;
-                        let baseAttrName = defaultAttrName.includes(' ') ? defaultAttrName.split(' ')[1] : defaultAttrName;
-                        inputEl.value = maxValues[baseAttrName] || 0;
+                        const resolveMaxKey = (n) => {
+                            if (maxValues[n] !== undefined) return n;
+                            // Try last word fallback
+                            const parts = n.split(' ');
+                            const last = parts[parts.length - 1];
+                            if (maxValues[last] !== undefined) return last;
+                            return n;
+                        };
+                        const maxKey = resolveMaxKey(defaultAttrName);
+                        inputEl.value = maxValues[maxKey] || 0;
                         inputEl.dataset.attrName = defaultAttrName;
                     }
 
@@ -563,7 +594,20 @@
                         let baseAttrName = selectedAttrName;
                         const elementalMatch = elements.find(el => selectedAttrName.startsWith(el + ' '));
                         if (elementalMatch) { baseAttrName = selectedAttrName.replace(elementalMatch + ' ', ''); }
-                        inputEl.value = maxValues[baseAttrName] || 0;
+                        const resolveMaxKey = (n) => {
+                            if (maxValues[n] !== undefined) return n;
+                            const parts = n.split(' ');
+                            // Try last two words then last one
+                            if (parts.length >= 2) {
+                                const lastTwo = parts.slice(-2).join(' ');
+                                if (maxValues[lastTwo] !== undefined) return lastTwo;
+                            }
+                            const last = parts[parts.length - 1];
+                            if (maxValues[last] !== undefined) return last;
+                            return n;
+                        };
+                        const maxKey = resolveMaxKey(baseAttrName);
+                        inputEl.value = maxValues[maxKey] || 0;
                     });
                 }
                 return card;
@@ -708,7 +752,17 @@
                         if (value === 0) continue;
                         const attrName = valueInput.dataset.attrName;
                         if (!attrName) continue;
-                        const mappedStat = statMap[attrName] || attrName;
+                        let mappedStat = statMap[attrName] || attrName;
+                        // Elemental remap for new naming scheme
+                        const elPattern = /^(Fire|Ice|Poison|Light|Dark) (Damage|Damage Resistance|Starting Mana)$/;
+                        const elMatch = elPattern.exec(attrName);
+                        if (elMatch) {
+                            const el = elMatch[1];
+                            const kind = elMatch[2];
+                            if (kind === 'Damage') mappedStat = `${el} Strike`;
+                            else if (kind === 'Damage Resistance') mappedStat = `${el} Ward`;
+                            else if (kind === 'Starting Mana') mappedStat = `${el} Pact`;
+                        }
                         totalStats[mappedStat] = (totalStats[mappedStat] || 0) + value;
                         if (mappedStat === 'Power') gearPower += value;
                         // Track gear contribution for mastery attributes
